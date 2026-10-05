@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-Emilio's workbench for his user-level Claude Code config: improving existing agents and skills, drafting new ones, and keeping a history of every change and why it was made. It is the **source of truth**. `~/.claude/` holds deployed copies (not symlinks) and is changed only through `scripts/sync.sh`. Everything here is Markdown except that script; there is no build and there are no tests.
+Emilio's workbench for his user-level Claude Code config: improving existing agents and skills, drafting new ones, and keeping a history of every change and why it was made. It is the **source of truth**. `~/.claude/` holds deployed copies (not symlinks) and is changed only through `scripts/sync.sh`. Everything here is Markdown except the scripts in `scripts/`; there is no build. `scripts/lint.sh` checks the conventions and contracts below that can be checked mechanically; behavior is smoke-tested by hand with `tests.md`.
 
 | Repo path | Deployed to | Role |
 |---|---|---|
@@ -17,10 +17,10 @@ Don't confuse `main-agent/CLAUDE.md` (the global instructions being authored) wi
 ## Workflow
 
 1. **Pull first.** Tools like `/agents`, `claude-md-improver`, and `revise-claude-md` edit `~/.claude` directly. Run `scripts/sync.sh` before starting; if it reports `live-newer` or `live-only` items, `scripts/sync.sh pull` (with `--global` if the global CLAUDE.md is among them) and log them in the changelog as outside edits.
-2. **Edit here**, keeping the cross-file contracts below consistent. If a skill's expected behavior changes, update its checks in `tests.md` in the same commit.
+2. **Edit here**, keeping the cross-file contracts below consistent. If a skill's expected behavior changes, update its checks in `tests.md` in the same commit. Run `scripts/lint.sh` before committing.
 3. **Log it.** Add an entry to `CHANGELOG.md` under today's date (newest first): `- **<agent/skill/global>** — what changed and why`. The why is the point. Commit the changelog entry together with the change, one agent or skill per commit where practical.
 4. **Deploy**: `scripts/sync.sh apply` — add `--global` when `main-agent/CLAUDE.md` changed. Changes load in **new** sessions only.
-5. **Smoke-test** skill and agent changes with `tests.md` — its coverage table says which tests to rerun; each runs in a new session in a scratch project. Record the run in its log; a failure means a fix commit and a rerun. Tests that run against private repos live in an untracked `tests.local.md`.
+5. **Smoke-test** skill and agent changes with `tests.md` — its coverage table says which tests to rerun; each runs in a new session in a scratch project, started with `scripts/smoke.sh <n>`. Record the run in its log (`scripts/check-test.sh` prints the row); a failure means a fix commit and a rerun. Tests that run against private repos live in an untracked `tests.local.md`.
 
 `scripts/sync.sh` (Git Bash) modes: `status` (default) · `diff` · `apply [--force] [--global]` · `pull [--force] [--global]`.
 
@@ -31,6 +31,8 @@ Don't confuse `main-agent/CLAUDE.md` (the global instructions being authored) wi
 - Every file it overwrites is first backed up to `.sync-backup/<timestamp>/{live,repo}/` (gitignored), and it never deletes anything.
 
 The newer/older check compares file timestamps, so it can't tell when *both* sides changed. If `apply` overwrites a live edit that way, recover it from `.sync-backup/`. The script ignores `~/.claude/skills/synced/` (managed by claude.ai) and `.trash/`. It targets `$CLAUDE_CONFIG_DIR` if that is set, so point that at a scratch copy to test it.
+
+`scripts/lint.sh` enforces: skill and agent names match their paths, every agent has a `color`, the reviewer and writing-agent rules below, every `${CLAUDE_SKILL_DIR}/…` path exists, the reviewer roster, and a coverage row in `tests.md` per skill. It also fails on any tracked file matching a pattern in `.lint-deny` (gitignored, one regex per line) — that is what keeps private project names out; without the file that check is skipped.
 
 To trial a draft agent or skill without deploying it globally, copy it into a test project's `.claude/agents/` or `.claude/skills/`; project-local definitions shadow global ones.
 

@@ -65,7 +65,7 @@ if [[ $mode != status && $mode != diff && -z $global ]]; then
 fi
 
 case $mode in
-  status) printf '%s\n' "${items[@]}" | sed "s|$GLOBAL\$|& [--global]|" | column -t ;;
+  status) printf '%s\n' "${items[@]}" | sed "s|$GLOBAL\$|& [--global]|" | if command -v column >/dev/null; then column -t; else cat; fi ;;
   diff)
     for it in "${items[@]}"; do
       read -r tag f <<<"$it"

@@ -14,6 +14,8 @@ My user-level Claude Code configuration — global instructions, subagents and s
 | `agents/docs-writer.md`, `refactorer.md`, `test-writer.md` | Small general-purpose agents |
 | `main-agent/CLAUDE.md` | My global instructions (deployed as `~/.claude/CLAUDE.md`). Personal preferences — read it as an example, don't install it |
 | `scripts/sync.sh` | Copies this repo to and from `~/.claude` |
+| `scripts/lint.sh` | Checks the repo's own conventions (names, frontmatter, cross-references) |
+| `scripts/smoke.sh`, `check-test.sh` | Start a smoke test's session with its first prompt; check what it left on disk |
 | `CHANGELOG.md` | Why each change was made, usually the failure in a real session that prompted it |
 | `tests.md` | Manual smoke-test runbook for the skills, with a run log |
 | `CLAUDE.md` | Guidance for Claude when working *on this repo*: cross-file contracts and authoring conventions |
@@ -59,7 +61,7 @@ Neither touches the global `CLAUDE.md` unless you pass `--global`, so your own i
 - **Check the run log.** The table at the bottom of `tests.md` records which smoke tests were run against which commit. Anything not logged there is unverified as deployed.
 - **Start guided.** Swarm mode runs several agents at once and burns through usage limits quickly.
 - **`sync.sh` needs bash 4+** — Git Bash on Windows or any current Linux. macOS's stock bash 3.2 lacks `mapfile`; use a Homebrew bash.
-- **`tests.md` is written for my machine:** Windows paths and PowerShell. Tests 3, 4 and part of 9 run against private repos and aren't included. Tests 1, 2, 5–8 and 10 need only a scratch folder; Test 11 works on any repo you know well.
+- **`tests.md` is written for my machine:** its by-hand setup blocks are PowerShell with Windows paths, though `scripts/smoke.sh` does the setup in bash. Tests 3, 4 and part of 9 run against private repos and aren't included. Tests 1, 2, 5–8 and 10 need only a scratch folder; Test 11 works on any repo you know well.
 - The reviewer roster covers the stacks I use. Adding one means touching the files listed under "Reviewer roster" in `CLAUDE.md`.
 
 ## License

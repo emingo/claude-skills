@@ -1,12 +1,14 @@
 # Skill smoke tests
 
-Manual end-to-end runbook for the planning, implementation and review skills (`/impl-plan`, `/milestone`, `/implement`, `/walkthrough`, `/followup`) and the `doc-sync` agent. These are prompt files, so there's no automated suite — each test is a Claude Code session in a scratch project plus a checklist of what to look for.
+Manual end-to-end runbook for the planning, implementation and review skills (`/impl-plan`, `/milestone`, `/implement`, `/walkthrough`, `/followup`) and the `doc-sync` agent. These are prompt files, so there's no automated suite — each test is a Claude Code session in a scratch project plus a checklist of what to look for. `scripts/smoke.sh <n>` starts a test's session and `scripts/check-test.sh <n>` checks what it left on disk; what Claude said, asked and paused on is still checked by eye.
 
 **When to run:** after changing any file the coverage table names, rerun its tests before committing (or at least before `scripts/sync.sh apply`). When a skill's behavior changes, update its tests here in the same commit.
 
 **Setup rules:**
 - Skills load from `~/.claude`, so deploy first (`scripts/sync.sh apply`) — or, to trial a draft without deploying, copy `impl-plan`, `milestone`, `implement` and `walkthrough` together into the scratch project's `.claude/skills/` (they read each other's files).
 - Every test needs a **new** Claude Code session; skills are loaded at startup.
+- **Starting a test:** `scripts/smoke.sh <n>` (Git Bash) asks which model to use, prints the test's section, and on a keypress opens the session in the scratch folder with the test's first prompt. That prompt is the first untagged code block in the section, so keep it first when editing a test; a prompt with `<placeholders>` is asked for. Test 1 also gets its folder created (default `../scratch-plantest`; `--dir` or `$SMOKE_DIR` to change it); Tests 3, 4 and 11 run elsewhere and need `--dir`. It warns when the deployed config differs from the repo.
+- **After a test:** the launcher runs `scripts/check-test.sh <n>` when the session ends. It checks the on-disk results of Tests 1 and 5 and prints the run-log row; for other tests it prints only the row.
 - Run everything in scratch folders or scratch clones, never in the real repos.
 - Tests 3 and 4 and Test 9's read-only `status` check run against private repos, so they live in an untracked `tests.local.md` (gitignored). On another machine, write your own equivalents against a project you know well.
 - Tests 1–2 and 5–9 build on each other in `C:\dev\scratch-plantest`, in order. Tests 3–4 (local) are independent. Test 10 needs only Test 1's plan and docs. Test 11 runs in a scratch clone; delete its notes file afterwards.
@@ -38,7 +40,7 @@ Tests 3 and 4 and part of 9 are in `tests.local.md`.
 
 ## Test 1: greenfield plan → all milestones (the main test)
 
-**Setup** (PowerShell):
+`scripts/smoke.sh 1` does this setup and starts the session. By hand (PowerShell):
 ```powershell
 mkdir C:\dev\scratch-plantest; cd C:\dev\scratch-plantest
 git init; git commit --allow-empty -m "init"
@@ -77,7 +79,7 @@ The empty commit matters: the skills record the commit each doc was written agai
 - [ ] **What exists** is marked *Projected* on milestones whose dependencies haven't landed.
 - [ ] Ledger links read `../follow-ups.md#fu-001`, and the follow-up you recorded appears in a reconciliation table.
 - [ ] The ledger's Index has a **Kind** column, and the entry has a `Kind:` field.
-- [ ] `docs/milestones/README.md` has the mermaid graph, parallelism matrix, the full protocol (rules 1–8), an "Execution modes" paragraph and the Section profile, and **no** status column.
+- [ ] `docs/milestones/README.md` has the mermaid graph, parallelism matrix, the full protocol (through its last rule, "Workers never edit docs or the ledger"), an "Execution modes" paragraph and the Section profile, and **no** status column.
 - [ ] Depends on ↔ Blocks is symmetric. Spot-check two docs.
 - [ ] Each plan gate links its doc and shows `proposed`. Nothing else in the plan changed.
 
