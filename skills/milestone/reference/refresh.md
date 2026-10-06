@@ -8,7 +8,7 @@ Let `<sha>` = the doc's `Written against` (if missing, use the commit that last 
 
 - `git log --oneline <sha>..HEAD` and `git diff --stat <sha>..HEAD` — what changed in the code.
 - **As-built records of every landed milestone this one depends on** (directly or transitively): "Deviations", "Notes for the next milestone", contract deviations, back-notes aimed at this id.
-- **Ledger:** `git log -p <sha>..HEAD -- <ledger>` — entries added since whose Areas overlap this milestone or that mention its id; entries this doc planned to resolve that were resolved elsewhere.
+- **Ledger:** `git log -p <sha>..HEAD -- <entry folder>` (never the generated index) — entries added or changed since whose `files:` or `areas:` overlap this milestone or that mention its id; entries this doc planned to resolve that were resolved elsewhere.
 - **Plan changes:** `git log -p <sha>..HEAD -- <plan>` — §Decisions edits, register answers, Stack, conventions, and this milestone's gate scope/acceptance (ignore status-line edits).
 - **Sibling docs:** milestones that can run alongside this one and started since — file-ownership collisions.
 
@@ -23,7 +23,7 @@ Let `<sha>` = the doc's `Written against` (if missing, use the commit that last 
 | Work packages | Files still exist / were renamed / were created by someone else? Scope still needed? Then run the **Swarm-readiness check** below. |
 | Contracts | Consumed contracts match the real signatures in code, not the owner doc's planned shape. Introduced contracts don't collide with anything that landed. |
 | Test requirements / Acceptance | Named tests and commands still valid; criteria still cover the gate. |
-| Ledger reconciliation | Rebuild the table from the current ledger index. |
+| Ledger reconciliation | Rebuild the table by grepping the ledger's open entries for the doc's owned files and areas (doc-model "Finding entries"). |
 | Risks | Add risks the deviations revealed; drop ones that are gone. |
 
 ## Swarm-readiness check

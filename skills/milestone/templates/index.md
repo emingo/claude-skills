@@ -37,7 +37,7 @@ graph LR
 2. **Contracts are frozen at the doc that introduces them.** A consumer needing a different shape records a deviation in its own as-built record and adds a back-note to the owner's.
 3. <Project-specific rule that avoids shared edit hotspots — e.g. registration by discovery instead of a shared list. Delete if none.>
 4. **Every work package closes with** its tests passing and any deferred item or surprising constraint logged via `/followup` before it counts as done.
-5. **Before starting a milestone, scan the ledger's index** (`<relative path to ledger>`) for open entries whose Areas overlap, and address or explicitly re-defer them in the doc's reconciliation table.
+5. **Before starting a milestone, grep the ledger** (`<relative path to the entry folder>`) for open entries whose `files:` or `areas:` overlap, and address or explicitly re-defer them in the doc's reconciliation table. The generated index next to it is for humans — agents don't read it.
 6. **`[VERIFY]` tags and register questions are answered in place** in the plan by the milestone that owns them — never left for someone else once that milestone starts.
 7. **Shared hotspots are pre-edited in `WP<n>.0`** (package refs, project/solution files, registries), so parallel work packages never edit the same manifest.
 8. **Workers never edit docs or the ledger.** They report; the coordinator assigns follow-up ids and runs doc-sync on main after every merge.

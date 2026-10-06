@@ -14,7 +14,7 @@ Check, in this order:
 5. **Dependencies.** Anything in Stack or code examples that implies a package not listed or not approved.
 6. **Layout ownership.** Every path in the repository-layout tree is attributed to a milestone.
 7. **Milestone shape.** M0 is a runnable, testable skeleton; each milestone is independently demonstrable; the dependency graph has no cycles and matches each gate's scope; any milestone likely to need more than ~7 work packages is a split candidate; nothing essential is scheduled after something that needs it.
-8. **Ledger.** If a ledger exists: open entries whose Areas overlap the plan and that it neither addresses nor explicitly defers.
+8. **Ledger.** If a ledger exists: open entries (grep `docs/fu/` front matter, never the generated index) whose `areas:` or `files:` overlap the plan and that it neither addresses nor explicitly defers.
 9. **Doc-model conformance.** Header fields, section order, Chosen/Rejected decision format, gate-block format, `None — <reason>` instead of deleted sections.
 
 Report findings only — no praise, no summary of the plan. For each:

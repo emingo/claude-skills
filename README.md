@@ -7,7 +7,7 @@ My user-level Claude Code configuration — global instructions, subagents and s
 | Path | What it is |
 |---|---|
 | `skills/impl-plan`, `skills/milestone`, `skills/implement` | A plan → milestone docs → implementation workflow (see below) |
-| `skills/followup` | `/followup <note>` — records deferred items, compromises and decisions to revisit in a ledger (`docs/follow-ups.md`) |
+| `skills/followup` | `/followup <note>` — records deferred items, compromises and decisions to revisit, one file per entry (`docs/fu/`), and regenerates a one-line-per-entry index for you (`docs/follow-ups.md`, needs PowerShell 7) |
 | `skills/walkthrough` | `/walkthrough` — works through a list of questions or findings one point at a time with a decision log; `/walkthrough tour` is a guided tour of a document or repo |
 | `agents/doc-sync.md` | Updates a project's existing docs after work lands: status lines, checklists, as-built records, the ledger |
 | `agents/*-reviewer.md`, `agents/reviewer.md` | Read-only pre-commit reviewers: C#, React (plain React + Zustand + styled-components), Python, Vulkan/GPU, and a generic one |

@@ -86,7 +86,8 @@ Rejected.
   docs/
     implementation-plan.md
     milestones/
-    follow-ups.md
+    fu/                   # one file per follow-up
+    follow-ups.md         # generated index, for humans
 ```
 
 ---

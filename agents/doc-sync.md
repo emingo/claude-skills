@@ -55,11 +55,11 @@ Projects planned with `/impl-plan` + `/milestone` split status between a **plan*
 
 ## Follow-up ledger
 
-If the project keeps a follow-up ledger (path declared in its CLAUDE.md; default `docs/follow-ups.md`), you maintain it. If no ledger file exists, skip this section entirely.
+If the project keeps a follow-up ledger (paths declared in its CLAUDE.md; default: one file per entry in `docs/fu/`, plus a generated index `docs/follow-ups.md`), you maintain it. If there is none, skip this section entirely. **Never read the generated index** — find entries by grepping the entry folder's front matter (`status:`, `areas:`, `files:`, `revisit:`). After changing any entry, regenerate the index with the `followup` skill's `scripts/fu-index.ps1` (a project-local `.claude/skills/followup/` copy wins over the user-level one in the Claude config dir): `pwsh -NoProfile -File <that script> -Dir <entry folder> -Out <index>`. A legacy single-file ledger follows that skill's `reference/legacy-ledger.md`.
 
-- Append entries the invoker reports: assign the next sequential `FU-NNN` id, fill **Status** (open) / **Kind** / **Origin** / **Areas** / **Impacts** / **What** plus **Why accepted** / **Revisit when** where the Kind requires them, and add the matching row to the Index table — heading, fields and anchor format exactly as the `followup` skill's `SKILL.md` specifies (match the ledger's existing style and columns).
-- New evidence about an existing entry (a duplicate finding, partial progress, a Kind change) is appended as a dated `- **Update (YYYY-MM-DD, <source>):** …` bullet — never a second entry, never an edit of the original text.
-- Flip an entry to `done (<sha> or PR #N, YYYY-MM-DD)` only when the commit range verifiably resolves it — read the code, don't trust the commit message. Never delete entries; keep the Index table in sync with the entry bodies.
+- Write entries the invoker reports as new files with the next sequential `FU-NNN` id — front matter and body exactly as the `followup` skill's `SKILL.md` specifies.
+- New evidence about an existing entry (a duplicate finding, partial progress, a Kind change) is appended to its body as a dated `- **Update (YYYY-MM-DD, <source>):** …` bullet — never a second entry, never an edit of the original text. A re-deferral also updates front-matter `revisit:` and sets `status: open (re-deferred)`.
+- Flip an entry's `status:` to `done (<sha> or PR #N, YYYY-MM-DD)` only when the commit range verifiably resolves it — read the code, don't trust the commit message. Never delete or rename entry files.
 - Scan the commit range for newly introduced `TODO` / "known limitation" / "follow-up" mentions (code comments and commit messages) that have no ledger entry — report each as a ledger candidate in your output; don't invent entries the invoker didn't confirm.
 
 ## How to find drift

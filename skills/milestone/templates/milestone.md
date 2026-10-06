@@ -89,11 +89,11 @@ When ticked: `- [x] <criterion> — <TestClass.Method / command → output / use
 
 ## Follow-up ledger reconciliation
 
-<!-- Every open ledger entry whose Areas overlap this milestone; ids link to the ledger (relative path + anchor). Disposition: **Resolved here** (which WP) / Re-deferred (reason, new owner) / Must not worsen / Interacts (how). Example row:
-| [FU-012](../follow-ups.md#fu-012) | Pipelines, resize | **Resolved here** — WP3.2 |
+<!-- Every open ledger entry whose files or areas overlap this milestone (grep the entry folder); ids link to the entry file. Disposition: **Resolved here** (which WP) / Re-deferred (reason, new owner) / Must not worsen / Interacts (how). Example row:
+| [FU-012](../fu/FU-012.md) | Pipelines, resize | **Resolved here** — WP3.2 |
 If none overlap: None — no open entries overlap (checked <date>). -->
 
-| FU | Areas overlap | Disposition |
+| FU | Overlap (files / areas) | Disposition |
 |---|---|---|
 
 ### New follow-ups raised

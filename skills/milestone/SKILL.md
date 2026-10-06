@@ -27,7 +27,7 @@ Arguments: $ARGUMENTS
 1. Conventions profile per doc-model.md (print it in five lines on first use this session).
 2. The plan — header (incl. `Execution`; missing → `guided`), Decisions, Stack, Conventions, Milestones section and dependency graph, Testing strategy, assumption register. No plan → stop and suggest `/impl-plan`. No testing strategy in the plan → ask the three-option testing question (smoke / detailed unit / TDD) once.
 3. The milestone index (if any) and the header block of each existing milestone doc (Status, Depends on, Blocks, Execution, Written against).
-4. The ledger index — open entries.
+4. The ledger's open entries — grep the entry folder's front matter (doc-model "Finding entries"); never the generated index.
 5. `git rev-parse --short HEAD` and today's date.
 
 Unless the mode is read-only: if the plan's Status is `draft`, ask once "Treat the plan as approved?" — yes sets `approved (<date>)`; no stops with "review the plan first".
@@ -58,7 +58,7 @@ Build one table covering every milestone before any doc is written. Rows for mil
 - contracts introduced and consumed;
 - acceptance criteria expanded from the plan gate (build/test gates first; repeat grep-able conventions);
 - which `[VERIFY]` tags / register questions each milestone owns (each becomes a `D<n>` design question);
-- a disposition for every open ledger entry whose Areas overlap;
+- a disposition for every open ledger entry whose `files:` or `areas:` overlap;
 - the **Section profile**: the index's existing one, or decide it now from the project's architecture (layer-named change sections, cross-cutting obligations such as tracing) — "Default sections only" if nothing warrants one.
 
 Run the consistency checklist (below) against the skeleton and fix it before drafting.

@@ -9,7 +9,8 @@ Canonical rules shared by `/impl-plan`, `/milestone`, `/implement`, the `doc-syn
 | **Plan** | *What* correct looks like and *in what order*: goal, decisions, spec, milestone gates | `/impl-plan` | Living. Gates change only via reviewed edits; status is one line per milestone |
 | **Milestone doc** | *How* one milestone's work is divided: design questions, work packages, checklist, as-built truth | `/milestone` | `proposed` → `approved` → `in progress` → `landed` (then frozen) |
 | **Milestone index** (`<milestones dir>/README.md`) | Documents table, dependency graph, parallelism, protocol, section profile | `/milestone all` | Updated when docs are added/split; no status column |
-| **Ledger** (`docs/follow-ups.md`) | Deferred items, decisions worth revisiting, compromises, accepted limitations | `/followup` only | Append-only; entries never deleted |
+| **Ledger** (`docs/fu/FU-NNN.md`, one file per entry) | Deferred items, decisions worth revisiting, compromises, accepted limitations | `/followup` only | Entries never deleted; status lives in each entry's front matter |
+| **Ledger index** (`docs/follow-ups.md`) | One line per entry, for the user | `fu-index.ps1` (generated) | Regenerated whenever an entry changes. **Agents never read it** — they grep `docs/fu/` |
 
 The plan is the single source of truth for *what*; milestone docs reference it by `§N.M` and never restate it. If they disagree, the plan wins until a reviewed edit changes it.
 
@@ -19,10 +20,10 @@ A project's existing conventions always beat these defaults. Resolve in this ord
 
 1. The project CLAUDE.md's Documentation Workflow section (declared paths, id pattern, ledger path, no-touch list).
 2. The milestone index's **Section profile**.
-3. Existing files: plan name (`docs/*plan*.md`, `docs/*IMPLEMENTATION*.md`, `docs/*roadmap*.md`), milestone dir and filenames, a `_template.md` in it, one sample milestone doc's headings, the ledger's heading style.
+3. Existing files: plan name (`docs/*plan*.md`, `docs/*IMPLEMENTATION*.md`, `docs/*roadmap*.md`), milestone dir and filenames, a `_template.md` in it, one sample milestone doc's headings, the ledger's layout (a `docs/fu/` entry folder, or a legacy single-file ledger and its heading style).
 4. Defaults below.
 
-Detect and report as a **conventions profile** (five lines): plan path + header style · milestone dir + id pattern + filename pattern · template/genre (merged default, project `_template.md`, or split design-doc + implementation-record) · layer-specific section names · ledger path + heading/anchor style.
+Detect and report as a **conventions profile** (five lines): plan path + header style · milestone dir + id pattern + filename pattern · template/genre (merged default, project `_template.md`, or split design-doc + implementation-record) · layer-specific section names · ledger layout + paths (entry folder and generated index, or legacy single file + heading/anchor style).
 
 A project with its own genre is followed, not migrated: e.g. `r<N>` ids with a `_template.md` and layer-named sections (`## Seam changes — <Project>`), or `mN-<topic>.md` design docs frozen as specs plus `mN-implementation.md` records with checkboxes ticked in the plan. Map the default section list onto theirs rather than adding headings they don't use.
 
@@ -35,7 +36,7 @@ A project with its own genre is followed, not migrated: e.g. `r<N>` ids with a `
 - Work packages: `WP` + the milestone id minus its letter prefix + `.n` — M2 → `WP2.1`, M6a → `WP6a.3`, R4 → `WP4.2`. `.0` = apply reviewer decisions, confirm entry criteria, and pre-edit the shared hotspots; the last WP = verification + doc-sync + ledger. Every other WP is implicitly After `.0`, and the last WP is implicitly After all the others.
 - Milestone design questions: `D<n>`, numbered per doc (`### D1. <Title> (Q5, FU-012)`). Never `Q<n>` — that's the plan's register.
 - Plan assumptions: `Q<n>` in the assumption register, project-wide; inline uncertainty: `[VERIFY]`.
-- Ledger: `docs/follow-ups.md`, ids `FU-NNN`.
+- Ledger: entries `docs/fu/FU-NNN.md`, generated index `docs/follow-ups.md`.
 
 ## Status words
 
@@ -45,20 +46,22 @@ A project with its own genre is followed, not migrated: e.g. `r<N>` ids with a `
 
 **Milestone doc `Status:`** `proposed` · `approved (YYYY-MM-DD)` · `in progress (WPx.n)` (the WP currently being worked; several when they run concurrently: `in progress (WP4a.2, WP4a.5)`) · `in progress (awaiting user check)` (code complete, only interactive criteria left — counts as code-complete for dependents, does not land) · `☑ landed (YYYY-MM-DD, <sha>)` · `superseded (→ <doc>)`. A milestone lands only when every acceptance criterion passes; landing with one outstanding requires an explicit user decision, recorded as a qualifier (`☑ landed (2026-09-10, abc1234) — interactive check waived by user, see As-built`) and in the As-built record.
 
-**Ledger:** `open` (optionally `open (accepted limitation)`, `open (re-deferred)`, `open (partially resolved — M4)`) → `done (<sha> or PR #N, YYYY-MM-DD)` / `dropped (reason)`.
+**Ledger** (an entry's front-matter `status:`): `open` (optionally `open (re-deferred)`, `open (needs user)`, `open (partially resolved — M4)`) → `done (<sha> or PR #N, YYYY-MM-DD)` / `dropped (reason)`.
+
+**Finding entries:** grep the entry folder's front matter — `status:`, `kind:`, `areas:`, `files:` (repo paths and folders), `revisit:`; the `followup` skill lists the queries. Match a milestone or work package by the files it owns first, then by area. Open an entry only when it matches.
 
 ### Ledger kinds
 
-Every new entry carries a **Kind** (field format owned by the `followup` skill):
+Every entry carries a `kind:` (format owned by the `followup` skill):
 
 | Kind | Meaning | Required extra field |
 |---|---|---|
-| `deferred` | Planned work moved later, incl. an acceptance criterion transferred to another milestone | **Revisit when:** owning milestone id or trigger |
+| `deferred` | Planned work moved later, incl. an acceptance criterion transferred to another milestone | `revisit:` owning milestone id or trigger |
 | `decision` | A choice made autonomously or on the user's behalf that they may want to revisit | — |
-| `compromise` | An accepted cost to keep scope | **Why accepted:** |
-| `limitation` | A known gap or constraint (incl. "outside this WP's ownership", "needs another repo") | **Why accepted:** |
+| `compromise` | An accepted cost to keep scope | **Why accepted:** in the body |
+| `limitation` | A known gap or constraint (incl. "outside this WP's ownership", "needs another repo") | **Why accepted:** in the body |
 
-**A bare milestone id in `Revisit when` blocks that milestone from landing** until the entry is resolved or explicitly re-deferred — this is what stops a deferred criterion from being silently dropped. **Re-deferring** never edits the entry: append `- **Update (YYYY-MM-DD, <source>):** Revisit when → <new> — <why>` and set Status `open (re-deferred)`. The *effective* Revisit when is the latest such Update, else the original field.
+**A bare milestone id in `revisit:` blocks that milestone from landing** until the entry is resolved or explicitly re-deferred — this is what stops a deferred criterion from being silently dropped. **Re-deferring** never rewrites the body: append `- **Update (YYYY-MM-DD, <source>):** Revisit when → <new> — <why>`, set `revisit:` to the new value and `status:` to `open (re-deferred)`. (In a legacy single-file ledger the effective Revisit when is the latest such Update, else the field.)
 
 Use commit SHAs (short, backticked) for evidence; PR numbers only when the project uses PRs.
 
@@ -112,7 +115,7 @@ What "swarm-ready" requires of every milestone doc:
 ## Links
 
 - Relative paths only. Plan → milestone: `milestones/M2-<slug>.md`. Milestone → plan: `../<plan>.md#<anchor>` or just `§N.M` in prose.
-- Milestone → ledger: the relative path from the doc to the resolved ledger path — `../follow-ups.md#fu-nnn` in the default layout (never `./follow-ups.md` from inside `docs/milestones/`). Anchor form follows the ledger: explicit `<a id="fu-nnn">` → `#fu-nnn`; otherwise GitHub's slug of the full heading. Ledger ids in tables are links too: `| [FU-012](../follow-ups.md#fu-012) | … |`.
+- Milestone → ledger: the relative path to the entry file — `../fu/FU-012.md` from `docs/milestones/<doc>.md`, `../../fu/FU-012.md` from a milestone folder. Ledger ids in tables are links too: `| [FU-012](../fu/FU-012.md) | … |`. Legacy single-file ledgers: `../follow-ups.md#fu-nnn` (explicit anchors) or GitHub's slug of the full heading — never `./follow-ups.md` from inside `docs/milestones/`. Links of that form keep working after migration (the generated index keeps the anchors).
 - Milestone → milestone: by id in prose (`M0's IPolicyHandler`, `WP6a.3 owns the table`), file link on first mention.
 
 ## Content rules
