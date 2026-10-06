@@ -1,4 +1,4 @@
-# agent-stuff
+# claude-skills
 
 My user-level Claude Code configuration — global instructions, subagents and skills — kept in git with the reason for every change. It's a personal setup, not a product: the instructions are tuned to how I work. But everything is plain Markdown, and most pieces can be lifted on their own.
 
@@ -38,8 +38,8 @@ The safest way is project-local: definitions in a project's `.claude/` shadow gl
 
 ```bash
 mkdir -p .claude/skills .claude/agents
-cp -r /path/to/agent-stuff/skills/{impl-plan,milestone,implement,walkthrough,followup} .claude/skills/
-cp /path/to/agent-stuff/agents/{doc-sync,reviewer}.md .claude/agents/
+cp -r /path/to/claude-skills/skills/{impl-plan,milestone,implement,walkthrough,followup} .claude/skills/
+cp /path/to/claude-skills/agents/{doc-sync,reviewer}.md .claude/agents/
 ```
 
 Copy the skills together — `milestone`, `implement` and `walkthrough` read files from `impl-plan`. Then start a **new** Claude Code session; skills and agents load at startup.

@@ -303,7 +303,7 @@ Run in a clone of a repo you know well, so you can judge the explanations. A tou
 ## When a check fails
 
 1. Note the test, the checkbox, and the relevant output (what Claude said or wrote).
-2. Fix it in `agent-stuff` — usually a line in a `SKILL.md`, in `doc-model.md`, or in one of `/implement`'s reference files — and update the affected test here if the expectation itself was wrong.
+2. Fix it in `claude-skills` — usually a line in a `SKILL.md`, in `doc-model.md`, or in one of `/implement`'s reference files — and update the affected test here if the expectation itself was wrong.
 3. Add a `CHANGELOG.md` entry, commit, `scripts/sync.sh apply`, and rerun the test in a new session.
 4. Record the run below.
 
@@ -311,7 +311,7 @@ Clean up afterwards: delete the scratch folders and clones (in `scratch-plantest
 
 ## Run log
 
-Append a row per run, newest first. "Skills at" is the `agent-stuff` commit that was deployed; "Model" is the session's main model, since a result on a cheaper model doesn't carry over to another.
+Append a row per run, newest first. "Skills at" is the `claude-skills` commit that was deployed; "Model" is the session's main model, since a result on a cheaper model doesn't carry over to another.
 
 | Date | Tests | Skills at | Model | Result | Notes |
 |---|---|---|---|---|---|
