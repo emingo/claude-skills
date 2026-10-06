@@ -8,7 +8,7 @@ Start here when picking up work: find the first milestone whose `Depends on:` ha
 
 | Doc | Milestone | Gate |
 |---|---|---|
-| [`M0-foundation.md`](./M0-foundation.md) | Foundation | prerequisite skeleton + first contracts |
+| [`M0-foundation/`](./M0-foundation/overview.md) | Foundation | prerequisite skeleton + first contracts |
 
 <!-- No status column — status lives in each doc's header and the plan's gate line. -->
 
@@ -40,7 +40,7 @@ graph LR
 5. **Before starting a milestone, grep the ledger** (`<relative path to the entry folder>`) for open entries whose `files:` or `areas:` overlap, and address or explicitly re-defer them in the doc's reconciliation table. The generated index next to it is for humans — agents don't read it.
 6. **`[VERIFY]` tags and register questions are answered in place** in the plan by the milestone that owns them — never left for someone else once that milestone starts.
 7. **Shared hotspots are pre-edited in `WP<n>.0`** (package refs, project/solution files, registries), so parallel work packages never edit the same manifest.
-8. **Workers never edit docs or the ledger.** They report; the coordinator assigns follow-up ids and runs doc-sync on main after every merge.
+8. **Workers never edit docs or the ledger.** They report; the coordinator assigns follow-up ids, writes the progress markers and runs doc-sync on main once per merged wave.
 
 ## Execution modes
 
@@ -56,4 +56,4 @@ Each milestone doc's `Execution:` says how it gets implemented: **guided** (one 
 
 ## As-built rules
 
-A milestone doc's As-built record is filled only after that milestone's acceptance criteria pass — never speculatively, never partially. Work packages that land earlier note it inline on the WP (`**Status: ☑ landed** (<sha>)`). Once landed, the doc is frozen: corrections are new dated entries, never rewrites. The gap between planned and actual is the point of the record — a plan that matched reality exactly is the rare case, not the assumed one.
+A milestone's landing record (in its `as-built.md`) is filled only after its acceptance criteria pass — never speculatively, never partially. Work packages that land earlier get a short per-WP note there and `☑ landed (<sha>)` in the overview's WP table. Once landed, the doc is frozen: corrections are new dated entries, never rewrites. The gap between planned and actual is the point of the record — a plan that matched reality exactly is the rare case, not the assumed one.

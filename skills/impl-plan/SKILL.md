@@ -86,4 +86,4 @@ This section doubles as the declared conventions for future runs.
 
 Report, briefly: plan path and line count; open `[VERIFY]` count; unresolved `ask-user` decisions; follow-ups recorded; suggested commit message `Add implementation plan for <X>`. If `ask-user` decisions remain, offer to settle them with `/walkthrough` before the question below.
 
-Then ask: **"Plan approved — generate all milestone docs now?"** with options *Yes, all milestone docs* (Recommended) / *Not yet — I'll review first* / *Only M0 for now*. On a yes, set the plan `Status: approved (<date>)` and invoke the `milestone` skill with `all` (or `M0`). Its report ends by pointing at `/implement next`.
+Then ask: **"Plan approved — generate the milestone docs now?"** with options *Yes, the next milestones* (Recommended — `/milestone all` writes just in time: the ones that can start soon; the rest when they come up) / *Every milestone doc now* (`all --full`) / *Not yet — I'll review first* / *Only M0 for now*. On a yes, set the plan `Status: approved (<date>)` and invoke the `milestone` skill with `all`, `all --full` or `M0`. Its report ends by pointing at `/implement next`.

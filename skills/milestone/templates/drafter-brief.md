@@ -3,10 +3,10 @@ You are drafting milestone execution docs for a project whose implementation pla
 Project root: <path>
 Plan: <plan path> (read the §refs listed for your milestones, plus §Decisions, §Conventions, §Assumption register)
 Doc model: <path to doc-model.md> — follow it exactly (status words, header fields, links, content rules, style).
-Template: <path to templates/milestone.md> — every heading, in order. Strip all `<!-- guidance -->` comments from the output; never delete a heading (empty → `None — <reason>`), except the `<Project obligation>` placeholder, which becomes the Section profile's sections (or is removed if the profile is "Default sections only").
+Template: <folder layout: paths to templates/folder/overview.md, wp.md, as-built.md | single file: path to templates/milestone.md> — every heading, in order. Folder layout: write `<milestone folder>/overview.md`, one `WP<id>.md` per work package and `as-built.md`; budgets — overview ≤ 12 KB, each WP file ≤ 6 KB (reference the plan by §, one line per decision's reasoning). Strip all `<!-- guidance -->` comments from the output; never delete a heading (empty → `None — <reason>`), except the `<Project obligation>` placeholder, which becomes the Section profile's sections (or is removed if the profile is "Default sections only").
 Section profile: <project-specific sections in order, or "Default sections only">
 Stack (approved packages): <list> — no work package may use anything else.
-Ledger: <ledger path or "none"> — anchor style: <explicit #fu-nnn | GitHub slug>
+Ledger: <entry folder, e.g. docs/fu/ — link entries as ../../fu/FU-NNN.md from a milestone folder | legacy single file + anchor style | "none"> — never read the generated index
 Testing approach: <smoke | detailed unit | TDD>
 HEAD: `<sha>`, date <YYYY-MM-DD> — use for every doc's `Written against`.
 
@@ -20,9 +20,9 @@ HEAD: `<sha>`, date <YYYY-MM-DD> — use for every doc's `Written against`.
 
 For each assigned milestone:
 
-1. Copy the skeleton fields verbatim into the header, work package titles/files, Contracts introduced, Acceptance criteria, and the ledger reconciliation table.
-2. Write the rest: Objective & why it matters (including the cost of getting it wrong), Spec references, Scope In/Out (each exclusion cites its owner), What exists (inventory the actual code; if a dependency hasn't landed, mark the section *Projected*), Entry criteria, Design questions (`D1`, `D2`… — one per owned [VERIFY]/register item and per genuine open choice; Proposal + *Alternative* with why not), WP scope paragraphs and Definitions of done (test-observable), Test requirements (criterion → named test), project obligation sections, Risks.
-3. Status `proposed`. Refresh log `None yet.` Reviewer decisions `_Pending review._` As-built record exactly as in the template.
+1. Copy the skeleton fields verbatim into the header, work package titles/files/After/Model/Review, Contracts introduced, Acceptance criteria, and the ledger reconciliation table.
+2. Write the rest: Objective & why it matters (including the cost of getting it wrong), Spec references, Scope In/Out (each exclusion cites its owner), What exists (inventory the actual code; if a dependency hasn't landed, mark the section *Projected*), Entry criteria, Decisions (`D1`, `D2`… — one per owned [VERIFY]/register item and per genuine open choice; open form: Proposal + Alternative with why not, one bullet each), WP scope paragraphs and Definitions of done (test-observable), Test requirements (criterion → named test), project obligation sections, Risks.
+3. Status `proposed`. As-built record exactly as in the template. Single file only: Refresh log `None yet.`, Reviewer decisions `_Pending review._`.
 4. You cannot ask the user anything: an open point becomes a Proposal in Design questions or a `[VERIFY]` tag noted in your report.
 
 If you believe a skeleton field is wrong (a missing dependency, a file two concurrent WPs would both edit, a contract in the wrong milestone) or a WP needs a package outside Stack, do not change it or write it in — add a `Skeleton objection: <what and why>` bullet under Risks and report it.
@@ -30,7 +30,7 @@ If you believe a skeleton field is wrong (a missing dependency, a file two concu
 Report back, per milestone, nothing else:
 
 ```
-<id> — <path> — <N> lines
+<id> — <path> — <overview KB> / largest WP <KB>
 Skeleton objections: <list or none>
 New [VERIFY] tags: <list or none>
 ```

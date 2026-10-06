@@ -4,7 +4,7 @@ A milestone doc written ahead of time captured the project as of its `Written ag
 
 ## 1. Collect what the doc hasn't seen
 
-Let `<sha>` = the doc's `Written against` (if missing, use the commit that last touched the doc: `git log -1 --format=%h -- <doc>`). If it's `n/a` (no git history): read landed As-built records and compare file modification dates against the doc's, skip the git commands, and say in the Refresh log that the comparison was date-based.
+Let `<sha>` = the doc's `Written against` (if missing, use the commit that last touched the doc: `git log -1 --format=%h -- <doc>`). If it's `n/a` (no git history): read landed As-built records and compare file modification dates against the doc's, skip the git commands, and say in the refresh record that the comparison was date-based (the Refresh log in a single-file doc, the commit message in the folder layout).
 
 - `git log --oneline <sha>..HEAD` and `git diff --stat <sha>..HEAD` — what changed in the code.
 - **As-built records of every landed milestone this one depends on** (directly or transitively): "Deviations", "Notes for the next milestone", contract deviations, back-notes aimed at this id.
@@ -19,8 +19,8 @@ Let `<sha>` = the doc's `Written against` (if missing, use the commit that last 
 | Header | Depends on / Blocks / Can run alongside still match the plan graph and the index. |
 | What exists | **Rewrite** as a real inventory of the current code — it's a snapshot, not history. Drop the *Projected* marker. |
 | Entry criteria | Each one met? Unmet → say so; that alone may mean "not ready", not "rewrite". |
-| Design questions (`D<n>`) | Already answered by a landed as-built or a register answer? Mark `Answered by <ref>` and fold it into the Proposal. Obsolete? Say why. New questions surfaced by deviations or ledger entries? Add them with the next free `D<n>`. |
-| Work packages | Files still exist / were renamed / were created by someone else? Scope still needed? Then run the **Swarm-readiness check** below. |
+| Decisions (`D<n>`) | Already answered by a landed as-built or a register answer? Mark `Answered by <ref>` and fold it into the Proposal. Obsolete? Say why. New questions surfaced by deviations or ledger entries? Add them with the next free `D<n>`. |
+| Work packages | Files still exist / were renamed / were created by someone else? Scope still needed? `Model:` / `Review:` still right? Then run the **Swarm-readiness check** below. Folder layout: every WP file is still within 6 KB and the overview within 12 KB. |
 | Contracts | Consumed contracts match the real signatures in code, not the owner doc's planned shape. Introduced contracts don't collide with anything that landed. |
 | Test requirements / Acceptance | Named tests and commands still valid; criteria still cover the gate. |
 | Ledger reconciliation | Rebuild the table by grepping the ledger's open entries for the doc's owned files and areas (doc-model "Finding entries"). |
@@ -48,25 +48,20 @@ Report each failure with the fix (add an `After:` edge, move a file to `.0`, spl
 - the plan gate's scope or acceptance bullets changed (status-line edits don't count);
 - the work is largely done already, or the milestone should now be split or merged.
 
-On the user's go-ahead, regenerate the doc from the template (skeleton rules still apply) and add `Rewritten YYYY-MM-DD — <reason>` as the first Refresh log entry; git keeps the old version. For a split or merge, the original doc stays with `Status: superseded (→ M3a, M3b)` and a Refresh log line; new docs are written via the single-doc path; the index and the plan's gate block are updated (gate replaced by the new gates, or marked `superseded (→ …)`) — show the plan edit to the user first.
+On the user's go-ahead, regenerate the doc from the template (skeleton rules still apply) and record `Rewritten YYYY-MM-DD — <reason>` (first Refresh log entry in a single file; the commit message in the folder layout); git keeps the old version. For a split or merge, the original doc stays with `Status: superseded (→ M3a, M3b)` and a Refresh log line; new docs are written via the single-doc path; the index and the plan's gate block are updated (gate replaced by the new gates, or marked `superseded (→ …)`) — show the plan edit to the user first.
 
 **Otherwise edit in place:**
 
 - Apply the changes from step 2.
-- Append to `## Refresh log`:
-  ```
-  ### Refreshed YYYY-MM-DD (against `<new sha>`)
-  - <section>: <what changed> — <why: commit, as-built note, FU id, plan edit>
-  ```
-  One bullet per changed section. If nothing changed: `- No changes — nothing relevant landed since \`<old sha>\`.`
+- Record what changed — one bullet per changed section: `- <section>: <what changed> — <why: commit, as-built note, FU id, plan edit>`, or `- No changes — nothing relevant landed since \`<old sha>\`.` Single file: append under `## Refresh log` as `### Refreshed YYYY-MM-DD (against \`<new sha>\`)`. Folder layout: no log in the doc — the bullets go into the refresh/approval commit message body.
 - Bump `Written against` to HEAD.
 - Substantive changes (scope, WPs, contracts, criteria) put `Status` back to `proposed` if it was `approved` (and the plan gate line with it).
 - `in progress` doc (explicit user request only): apply the edits and log them, but leave `Status` and the gate alone and skip step 4.
 
 ## 4. Approval
 
-1. Each design question without a decision becomes one AskUserQuestion option set: the Proposal (marked Recommended) vs the Alternative (plus "Other"). Batch up to four per round. With **more than four** undecided questions, run them as `/walkthrough <doc>#<its design-questions section>` instead — it records into this same Reviewer decisions format — then continue at step 3 in the same turn. Before step 4, list any `D<n>` the walkthrough left deferred or open and ask: take the Proposal now (recorded with a `Kind: decision` follow-up), or keep the doc `proposed`. Include the walkthrough log and any ledger entries in the approval commit.
-2. Record answers under `## Reviewer decisions` as `### YYYY-MM-DD` with numbered bullets. Fold each decision into its question (`**Decision:** …`) so the WP text is unambiguous.
+1. Each design question without a decision becomes one AskUserQuestion option set: the Proposal (marked Recommended) vs the Alternative (plus "Other"). Batch up to four per round. With **more than four** undecided questions, run them as `/walkthrough <doc>#<its decisions section>` instead — it records into this same decisions format — then continue at step 3 in the same turn. Before step 4, list any `D<n>` the walkthrough left deferred or open and ask: take the Proposal now (recorded with a `Kind: decision` follow-up), or keep the doc `proposed`. Include the walkthrough log and any ledger entries in the approval commit.
+2. Record the answers. Folder layout: rewrite each `D<n>` bullet in the overview to its decided form — `<chosen>. Rejected: <alternative> — <why>. (<date>, user)` — and nothing else; a decision the user wants to revisit also gets a `/followup` (`kind: decision`) linked from the bullet. Single file: under `## Reviewer decisions` as `### YYYY-MM-DD` with numbered bullets, folding each into its question (`**Decision:** …`). Either way the WP text must be unambiguous afterwards.
 3. If a decision implies a plan edit (a §Decision, register answer, or gate), show the exact edit; apply only if the user agrees, and note it on the plan's Last-updated line.
 4. Set `Status: approved (YYYY-MM-DD)` in the doc and the gate's status line in the plan. New dependencies implied by a decision follow the Stack rule (ask, then edit Stack).
 
@@ -76,7 +71,7 @@ A doc whose `Written against` is HEAD and whose questions are all decided skips 
 
 Used only by `/implement` in swarm mode, after its up-front design round, when a milestone becomes eligible mid-run. Steps 1–3 as usual; then, instead of asking:
 
-1. Accept each undecided design question's **Proposal**. Record them under `## Reviewer decisions` as `### YYYY-MM-DD (autonomous — /implement)` with numbered bullets, and fold each into its question (`**Decision:** …`).
+1. Accept each undecided design question's **Proposal**. Folder layout: rewrite each `D<n>` bullet to its decided form marked `(<date>, autonomous, FU-NNN)`. Single file: record them under `## Reviewer decisions` as `### YYYY-MM-DD (autonomous — /implement)` with numbered bullets, folding each into its question (`**Decision:** …`).
 2. For each significant decision (it shapes a contract, a file layout, a user-visible behavior, or carries a cost), invoke `/followup` with `Kind: decision` (or `compromise` when there's an accepted cost, with **Why accepted**) and Origin `— <id> refresh (autonomous)`.
 3. A decision that would change the plan (a §Decision, register answer, Stack or gate) is **not** applied: keep the current shape and open a follow-up marked "needs user".
 4. A rewrite recommendation (step 3) halts this milestone instead — report it to `/implement`, which halts the milestone and its dependents.

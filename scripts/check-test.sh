@@ -21,7 +21,8 @@ bad() { echo "  FAIL  $1${2:+ — $2}"; fails=$((fails + 1)); }
 check() { local d=$1 out; shift; if out=$("$@" 2>&1); then ok "$d"; else out=${out//$'\n'/ }; bad "$d" "${out:0:200}"; fi; }
 
 PLAN=docs/implementation-plan.md; MS=docs/milestones; LEDGER=docs/follow-ups.md; FU=docs/fu
-docs=("$MS"/M[0-9]*-*.md)
+docs=("$MS"/M[0-9]*-*/overview.md)   # one folder per milestone
+wpfiles() { local f w; for f in "${docs[@]}"; do for w in "${f%/*}"/WP*.md; do echo "$w"; done; done; }
 nofence() { awk '/^```/ {f=!f; next} !f' "$1"; }   # a doc without its code blocks, so sample Markdown isn't checked
 # absent <regex> <files…>: nothing matches; an unreadable file is a failure, not a pass
 absent() { local out rc; out=$(grep -nE "$@" 2>&1); rc=$?; [[ $rc -eq 1 ]] || { echo "$out"; return 1; }; }
@@ -36,7 +37,7 @@ no_comments() {
 }
 # field <doc> <name>: a header field, minus its parenthetical notes (nested ones too) — they name other milestones
 field() { grep -m1 -E "^\*\*$2:\*\*" "$1" | sed -e ':a' -e 's/([^()]*)//g' -e 'ta'; }
-doc_id() { local b=${1##*/}; echo "${b%%-*}"; }
+doc_id() { local b=${1%/overview.md}; b=${b##*/}; echo "${b%%-*}"; }
 # ids <text>: the milestone ids it names, with ranges like M2–M5 expanded
 ids() {
   local s=$1 r i
@@ -47,7 +48,7 @@ ids() {
   grep -oE '\bM[0-9]+[a-z]?\b' <<<"$s" | sort -u
 }
 # lacking <regex>: fails listing the milestone docs that don't match it
-lacking() { local f out=; for f in "${docs[@]}"; do grep -qE "$1" "$f" || out+=" ${f##*/}"; done; [[ -z $out ]] || { echo "missing in:$out"; return 1; }; }
+lacking() { local f out=; for f in "${docs[@]}"; do grep -qE "$1" "$f" || out+=" ${f#$MS/}"; done; [[ -z $out ]] || { echo "missing in:$out"; return 1; }; }
 separators() { [[ $(count '^---[[:space:]]*$' "$PLAN") -ge $(($(count '^## [0-9]+\. ' "$PLAN") - 1)) ]]; }
 verify_register() {
   grep -F '[VERIFY]' "$PLAN" | grep -qv 'marks an unconfirmed assumption' || { echo "no [VERIFY] tag beyond the rule in §0"; return 1; }
@@ -59,9 +60,24 @@ no_status_column() {
   ! grep -qi status <<<"$hdr"
 }
 wps_have_after() {
+  local w out=
+  while read -r w; do
+    grep -qE '\*\*After:\*\*' "$w" && grep -qE '\*\*Model:\*\* (sonnet|opus)' "$w" && grep -qE '\*\*Review:\*\* (full|light)' "$w" || out+=" ${w#$MS/}"
+  done < <(wpfiles)
+  [[ -z $out ]] || { echo "WP files without After/Model/Review:$out"; return 1; }
+}
+# budgets: overview ≤ 12 KB, WP files ≤ 6 KB
+budgets() {
   local f out=
-  for f in "${docs[@]}"; do [[ $(count '^### WP[0-9]+[a-z]?\.[0-9]+' "$f") -eq $(count '^\*\*After:\*\*' "$f") ]] || out+=" ${f##*/}"; done
-  [[ -z $out ]] || { echo "work packages without After:$out"; return 1; }
+  for f in "${docs[@]}"; do [[ $(wc -c <"$f") -le 12288 ]] || out+=" ${f#$MS/}"; done
+  while read -r f; do [[ $(wc -c <"$f") -le 6144 ]] || out+=" ${f#$MS/}"; done < <(wpfiles)
+  [[ -z $out ]] || { echo "over budget:$out"; return 1; }
+}
+# every WP file is a row of its overview's WP table
+wp_rows() {
+  local w out=
+  while read -r w; do grep -qF "](${w##*/})" "${w%/*}/overview.md" || out+=" ${w#$MS/}"; done < <(wpfiles)
+  [[ -z $out ]] || { echo "not in the overview's WP table:$out"; return 1; }
 }
 # linked <field> <back field>: every id in <field> names a doc whose <back field> names this one.
 # A split parent (M6 for M6a/M6b) counts on either side. Prose such as "all later milestones" can't be resolved.
@@ -71,7 +87,7 @@ linked() {
     id=$(doc_id "$f")
     for other in $(ids "$(field "$f" "$1")"); do
       hit=
-      for o in "$MS/$other"-*.md "$MS/$other"[a-z]-*.md; do
+      for o in "$MS/$other"-*/overview.md "$MS/$other"[a-z]-*/overview.md; do
         ids "$(field "$o" "$2")" | grep -qE "^($id|${id%[a-z]})\$" && hit=1
       done
       [[ -n $hit ]] || out+=" $id→$other"
@@ -81,12 +97,12 @@ linked() {
 }
 projected() {
   local f out=
-  for f in "${docs[@]}"; do field "$f" 'Depends on' | grep -qE '\bM[0-9]' && ! grep -q 'Projected' "$f" && out+=" ${f##*/}"; done
+  for f in "${docs[@]}"; do field "$f" 'Depends on' | grep -qE '\bM[0-9]' && ! grep -q 'Projected' "$f" && out+=" ${f#$MS/}"; done
   [[ -z $out ]] || { echo "not marked Projected:$out"; return 1; }
 }
 gates() {   # gates <regex>: the plan line linking each doc matches it
   local f out=
-  for f in "${docs[@]}"; do grep -F "milestones/${f##*/}" "$PLAN" | grep -qE "$1" || out+=" ${f##*/}"; done
+  for f in "${docs[@]}"; do grep -F "milestones/${f#$MS/}" "$PLAN" | grep -qE "$1" || out+=" ${f#$MS/}"; done
   [[ -z $out ]] || { echo "plan gate wrong or missing for:$out"; return 1; }
 }
 
@@ -112,11 +128,15 @@ test_1() {
   check "every doc: Execution: guided" lacking '^\*\*Execution:\*\* guided\b'
   check "every doc: Work packages count" lacking '^\*\*Work packages:\*\* [0-9]+'
   check "every doc: Written against a commit sha" lacking '^\*\*Written against:\*\* `[0-9a-f]{7,}`'
-  check "every work package has an After: line" wps_have_after
+  check "every WP file has After, Model and Review" wps_have_after
+  check "every WP file is a row of its overview's WP table" wp_rows
+  check "size budgets: overview ≤ 12 KB, WP files ≤ 6 KB" budgets
+  check "every milestone folder has as-built.md" lacking_asbuilt
+  check "no Reviewer decisions / Refresh log sections in folder docs" absent '^## (Reviewer decisions|Refresh log)' "${docs[@]}"
   check "docs with unlanded dependencies mark What exists as Projected" projected
   check "Depends on is mirrored by Blocks" linked 'Depends on' Blocks
   check "Blocks is mirrored by Depends on" linked Blocks 'Depends on'
-  check "no <!-- guidance comments left in the milestone docs" no_comments "${docs[@]}"
+  check "no <!-- guidance comments left in the milestone docs" no_comments "${docs[@]}" $(wpfiles)
   check "each plan gate links its doc and shows proposed" gates 'proposed'
 
   check "index exists at $MS/README.md" test -f "$MS/README.md"
@@ -130,8 +150,8 @@ test_1() {
   check "ledger entries exist in $FU" compgen -G "$FU/FU-*.md"
   check "index at $LEDGER is generated" grep -q '^<!-- GENERATED by fu-index' "$LEDGER"
   check "ledger entries carry kind: in front matter" grep -qE '^kind: ' "$FU"/FU-*.md
-  check "milestone docs link entries as ../fu/FU-….md" grep -qE '\]\(\.\./fu/FU-[0-9]+\.md\)' "${docs[@]}"
-  check "no ./follow-ups.md links from inside $MS" absent '\]\((\./)?follow-ups\.md' "$MS"/*.md
+  check "milestone overviews link entries as ../../fu/FU-….md" grep -qE '\]\(\.\./\.\./fu/FU-[0-9]+\.md\)' "${docs[@]}"
+  check "no links to the generated index from inside $MS" absent '\]\(([./]*)follow-ups\.md' "$MS"/*.md "$MS"/*/*.md
 }
 
 # wp_sync <milestone>: every work package with a code commit has a later "Sync docs for <M> <WP> (" commit
@@ -146,21 +166,22 @@ wp_sync() {
   done
   [[ -z $out ]] || { echo "no sync commit after:$out"; return 1; }
 }
-wps_landed() { [[ $(count '^### WP[0-9]+[a-z]?\.[0-9]+' "$1") -eq $(count '^\*\*Status: ☑ landed\*\*' "$1") ]]; }
+wps_landed() { [[ $(count '^\| \[WP' "$1") -gt 0 && $(count '^\| \[WP' "$1") -eq $(count '^\| \[WP.*☑ landed' "$1") ]]; }
+lacking_asbuilt() { local f out=; for f in "${docs[@]}"; do [[ -f ${f%/*}/as-built.md ]] || out+=" ${f#$MS/}"; done; [[ -z $out ]] || { echo "no as-built.md:$out"; return 1; }; }
 clean_tree() { local out; out=$(git status --porcelain); [[ -z $out ]] || { echo "$out"; return 1; }; }
 # One ledger entry that is both Kind compromise and has Why accepted
 compromise() { local f; for f in "$FU"/FU-*.md; do grep -qE '^kind: *compromise' "$f" && grep -q '\*\*Why accepted:\*\*' "$f" && return 0; done; return 1; }
 
 # Test 5 — after M0's last work package
 test_5() {
-  local m0=("$MS"/M0-*.md)
+  local m0=("$MS"/M0-*/overview.md)
   check "M0 doc exists" test "${#m0[@]}" -gt 0
   [[ ${#m0[@]} -gt 0 ]] || return
   check "approval commit 'Approve the M0 milestone doc'" grep -qxF 'Approve the M0 milestone doc' <(git log --format=%s)
   check "every M0 work package commit is followed by its own Sync docs commit" wp_sync M0
   check "M0 doc is ☑ landed with a date and sha" grep -qE '^\*\*Status:\*\* ☑ landed \([0-9]{4}-[0-9]{2}-[0-9]{2}, `?[0-9a-f]{7,}' "${m0[0]}"
-  check "every M0 work package is marked ☑ landed" wps_landed "${m0[0]}"
-  check "As-built record is filled in" absent '^_Not implemented yet\._' "${m0[0]}"
+  check "every row of M0's WP table is ☑ landed" wps_landed "${m0[0]}"
+  check "as-built.md has a landing record" absent '^_Not landed yet\._' "${m0[0]%/*}/as-built.md"
   docs=("${m0[@]}"); check "plan gate for M0 says landed" gates 'landed \('
   check "the declined finding became a compromise follow-up with Why accepted" compromise
   check "working tree is clean" clean_tree
