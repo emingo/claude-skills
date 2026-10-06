@@ -149,7 +149,7 @@ graph LR
 
 ## 10. Cross-cutting practices
 
-<!-- Every-milestone obligations: docs stay live (doc-sync after every WP in guided mode, after every merge in swarm mode — never batched), /followup before a WP is done, error-path tests written with the feature, build warnings policy. -->
+<!-- Every-milestone obligations: docs stay live (doc-sync after every WP in guided mode, once per merged wave in swarm mode), /followup before a WP is done, error-path tests written with the feature, build warnings policy. -->
 
 ---
 

@@ -4,7 +4,8 @@ There is no run-state file. Everything is recoverable from the docs, git and the
 
 Check in this order:
 
-1. **Docs.** Each milestone's Status; each WP's inline marker — `**Status: ☑ landed** (<sha>)` or `**Status: ⛔ blocked** (…)`. Blocked WPs stay blocked until the user resolves the cause.
+0. **A running loop.** `.implement/loop/loop.lock` naming a live process → an unattended loop is coordinating: report it (and the last lines of `.implement/loop/loop.log`) and stop — never start a second coordinator.
+1. **Docs.** Each milestone's Status; each WP's marker — the Status cell of the overview's WP table (single-file docs: `**Status: ☑ landed** (<sha>)` under the WP heading) — `☑ landed` or `⛔ blocked`. Blocked WPs stay blocked until the user resolves the cause.
 2. **The current branch**, in this order:
    1. **A merge in progress** (`git rev-parse -q --verify MERGE_HEAD` succeeds) → `git merge --abort`; treat that WP as a task failure (swarm.md §5).
    2. **A `.implement/reports/<WP>.md` file on the branch** → the merge happened but its processing didn't finish: run merge protocol steps 3–7 for it (build + test first).
@@ -15,6 +16,6 @@ Check in this order:
    - **partial** — uncommitted changes, or a report not `done` → salvage: `git -C <path> add -A` and `git -C <path> commit -m "WIP <M> WPx.y: salvage uncommitted changes after interruption"`; then relaunch a worker as for a task failure (swarm.md §5, "never merged"); then unlock if needed and `git worktree remove <path>`. Keep the old branch until the new worker's work is merged (merge protocol step 7 deletes it).
    - **empty** — no commits beyond its base **and** a clean tree → unlock if needed, remove the worktree, `git branch -d` the branch.
    A worktree locked by a process that no longer exists (`locked` in the porcelain output, the agent isn't running) needs `git worktree unlock` before `remove`. If `remove` or `branch -d` refuses, stop and look — never `--force` / `-D`.
-4. **Guided leftovers.** A dirty main tree whose changes fall inside the in-progress WP's files owned → an interrupted guided WP (see `guided.md`). Dirty files outside it → stop and ask.
+4. **Leftovers on main.** Uncommitted edits only to milestone status lines, WP table cells and the plan's status lines → the coordinator's unsynced markers: keep them and include them in the next doc-sync commit. A dirty tree whose changes fall inside the in-progress WP's files owned → an interrupted guided WP (see `guided.md`). Dirty files elsewhere → stop and ask (`--unattended`: stop with `needs-user`).
 
-Print a resume table — WP · state · action — and ask "Resume?" once. Self-invoked runs (SKILL.md rule 3) that find swarm state stop here and ask the user to type `/implement`. Then continue with the normal preflight from the clean-tree check onward (an accepted guided leftover is exempt from it).
+Print a resume table — WP · state · action — and ask "Resume?" once (`--unattended`: don't ask, resume). Self-invoked runs (SKILL.md rule 3) that find swarm state stop here and ask the user to type `/implement`. Then continue with the normal preflight from the clean-tree check onward (an accepted guided leftover is exempt from it).

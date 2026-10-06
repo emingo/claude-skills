@@ -1,8 +1,8 @@
 ---
 name: implement
-description: Implement the plan's milestones from their milestone docs. Guided mode works one work package at a time in this session — implement, stack review, commit, doc-sync, then pause for the user's go-ahead. Swarm mode runs parallel worktree agents per the work packages' After/ownership rules, merging and doc-syncing each one, recording autonomous decisions and compromises as follow-ups, and resuming cleanly after interruptions. /implement [next | <id> | <id>..<id> | all] [--agents N]; /implement status prints progress read-only. Use when the user says "let's start implementing M3", "implement the next milestone", "continue implementing", or asks to resume an interrupted implementation run.
-argument-hint: "[next | <id> | <id>..<id> | all | status] [--agents N]"
-allowed-tools: Bash(git status *) Bash(git log *) Bash(git diff *) Bash(git show *) Bash(git rev-parse *) Bash(git merge-base *) Bash(git merge *) Bash(git add *) Bash(git rm *) Bash(git commit *) Bash(git revert *) Bash(git grep *) Bash(git submodule status *) Bash(git worktree list *) Bash(git worktree unlock *) Bash(git worktree remove *) Bash(git branch -d *) Bash(git branch --list *) Bash(git -C * status *) Bash(git -C * log *) Bash(git -C * add *) Bash(git -C * commit *)
+description: Implement the plan's milestones from their milestone docs. Guided mode works one work package at a time in this session — implement, stack review, commit, doc-sync, then pause for the user's go-ahead. Swarm mode runs parallel worktree agents per the work packages' After/ownership rules, merging and doc-syncing each one, recording autonomous decisions and compromises as follow-ups, and resuming cleanly after interruptions. Swarm runs are unattended by default: after one interactive design round, a driver script runs one fresh headless session per milestone. /implement [next | <id> | <id>..<id> | all] [--agents N] [--step]; /implement status prints progress read-only. Use when the user says "let's start implementing M3", "implement the next milestone", "continue implementing", or asks to resume an interrupted implementation run.
+argument-hint: "[next | <id> | <id>..<id> | all | status] [--agents N] [--step]"
+allowed-tools: Bash(git status *) Bash(git log *) Bash(git diff *) Bash(git show *) Bash(git rev-parse *) Bash(git merge-base *) Bash(git merge *) Bash(git add *) Bash(git rm *) Bash(git commit *) Bash(git revert *) Bash(git grep *) Bash(git submodule status *) Bash(git worktree list *) Bash(git worktree unlock *) Bash(git worktree remove *) Bash(git branch -d *) Bash(git branch --list *) Bash(git -C * status *) Bash(git -C * log *) Bash(git -C * add *) Bash(git -C * commit *) Bash(pwsh -NoProfile -File *)
 ---
 
 # /implement — implement milestones from their docs
@@ -12,17 +12,20 @@ Arguments: $ARGUMENTS
 ## Hard rules
 
 1. **Read `${CLAUDE_SKILL_DIR}/../impl-plan/reference/doc-model.md` first** — doc roles, status words and "Who changes what", Execution modes, WP markers, staleness, ledger kinds. The `impl-plan`, `milestone` and `implement` skills deploy and are trialled together.
-2. **Own no status transition** except the plan's `draft` → `approved` when the user confirms it in preflight. Approval comes from `/milestone refresh`, ledger entries from `/followup`, WP markers and in-progress / landed / implemented from `doc-sync`. This skill invokes them; it never edits those Status lines itself.
+2. **Write only the routine progress markers** doc-model's "Who changes what" gives this skill — milestone `in progress (…)`, gate and plan header `in progress`, WP `☑ landed` / `⛔ blocked` — plus the plan's `draft` → `approved` when the user confirms it in preflight. They are 1–3 line edits of values you already know; never re-read a doc to make them. Approval comes from `/milestone refresh`, ledger entries from `/followup`, and everything evidence-backed (ticked criteria, as-built, awaiting user check, landed, implemented, ledger status) from doc-sync.
 3. **Self-invocation gate.** If Claude loaded this skill without the user typing `/implement` (e.g. "let's start implementing M7"), ask **before anything else**: "Implement <M> guided — a WP commit plus a doc-sync commit per work package, pausing after each?" — and then run **guided mode on that one milestone only**. If resume finds swarm state (agent worktrees, unmerged agent branches), print the resume table and ask the user to type `/implement` instead. Swarm mode, `all`, ranges and `--agents` require the user's own `/implement` or an explicit request for the agent swarm.
 4. **Committing is the job; nothing beyond it.** Typing `/implement` (or a yes to rule 3) is consent to commit on the **current branch**: WP commits, `--no-ff` merges, integration fixes, reverts, doc-sync commits. **Never push.** Never amend, rebase, `reset --hard`, `clean`, `checkout --`/`restore` over uncommitted work, `branch -D`, `worktree remove --force`, or force anything else. Never edit or commit inside a submodule or any path outside the repo; a submodule pointer bump happens only when the user asks.
 5. **Main stays green.** Build and test after every commit or merge. If the branch can't be made green, halt the whole run and report.
-6. **Stack reviewer before every code commit** — WP commits, and the coordinator's own `.0`, integration-fix and stub commits — using the agent the global CLAUDE.md "Agents" section prescribes for the stack (never hardcode the roster here). No "Agents" section in the global or project CLAUDE.md → resolve it in preflight: use the generic `reviewer` agent and say so in the run plan; if it isn't installed either, stop and ask which agent to use.
+6. **Stack reviewer before every code commit** — WP commits, and the coordinator's own integration-fix and stub commits — using the agent the global CLAUDE.md "Agents" section prescribes for the stack (never hardcode the roster here). Brief it with the change, not the code: the repo or worktree path, the diff to review (`git diff <base>...HEAD -- <paths>`, or the uncommitted diff), the WP file, and the WP's `Review:` depth (`full` / `light`); it runs git itself. No "Agents" section in the global or project CLAUDE.md → resolve it in preflight: use the generic `reviewer` agent and say so in the run plan; if it isn't installed either, stop and ask which agent to use.
 7. **No package outside the plan's Stack.** Guided: ask the user (what it does / the no-dependency alternative). Swarm: the WP is blocked until the user decides.
 8. **Ledger ids are assigned only by the main session**, through `/followup`, one at a time. Workers never touch the plan, milestone docs, index, ledger, README or CLAUDE.md. doc-sync, when invoked from here, only appends Updates and flips statuses — it never creates entries.
 9. **Nothing survives a merge cycle** among: notes to the coordinator in code, `FU-TBD-*` placeholders, `TODO`/`FIXME`/`HACK` without an FU id.
 10. **Deferred criteria become ledger entries:** a criterion moved to a later milestone → `/followup` with `Kind: deferred`, `Revisit when: <that later milestone>`.
 11. **Branch hygiene without losing work:** remove the worktree and delete the branch (`git branch -d`) of every WP that merged or never produced anything (`git worktree unlock` first if a dead process left it locked). A blocked or abandoned WP's branch holds unmerged work — **keep it** and list it in the run report.
 12. **State lives in docs, git and worktrees — never only in context.** Re-running `/implement` resumes (`${CLAUDE_SKILL_DIR}/reference/resume.md`).
+13. **Keep this session's context small** — the coordinator was half the tokens of earlier runs. Workers implement every swarm WP, `.0` included. Builds, tests and scripts write to a log file and you print only the summary lines; never dump process listings, whole logs or whole docs. Read docs by section (Grep the headings, Read with offset/limit). Hand doc-sync and workers paths, shas and ids — not pasted content.
+14. **Slow commands run guarded.** No baseline run of slow end-to-end checks (packaging/consumer smoke, full screenshot runs) — the preflight baseline is the build and unit tests; slow checks run in the verification WP. Run a script as `pwsh -NoProfile -File <script> *> <log>` (or the shell's equivalent) in the background with a timeout of about 3× its usual duration and watch it with Monitor; on a timeout, stop its process tree, retry once, then report.
+15. **Design and implementation never share a session.** After the `Approve …` commit, swarm milestones run through the unattended loop (below) and guided milestones end the turn with "approved — `/clear`, then `/implement` to start" — resume picks it up. Every milestone gets a fresh coordinator session.
 
 ## Modes
 
@@ -35,6 +38,8 @@ Arguments: $ARGUMENTS
 | `<id>..<id>` | Inclusive range in plan order. Every dependency outside the range must be landed or awaiting a user check — else list them and stop. |
 | `all` | Every milestone not landed. |
 | `--agents N` | Swarm concurrency cap (default **4**). |
+| `--step` | Swarm without the loop: run one milestone in this session, then stop with "<M> done — `/clear`, then `/implement` to continue". |
+| `--unattended` | Passed only by the loop script — see Unattended. |
 
 **Awaiting user check** — print that milestone's interactive checks (exact command + what to look for) and ask whether the user has done them. Confirmed → pass the user's words to doc-sync as evidence, which ticks them and lands the milestone; commit `Sync docs for <M>: user checks confirmed`. Not yet → skip it; its dependents may still proceed.
 
@@ -42,7 +47,7 @@ Arguments: $ARGUMENTS
 
 1. **Resume check first:** derive state per `reference/resume.md`. If anything is in flight, print the resume table and ask "Resume?" before anything else.
 2. **Clean tree** (`git status --porcelain` empty, `.claude/worktrees/` aside — and except an interrupted guided WP the user chose to continue). State the branch the run will commit to.
-3. **Green baseline.** Build and test commands from the project CLAUDE.md → the plan's Testing section → the active doc's first two acceptance criteria. Run them now: red → stop. Running them here also surfaces permission prompts while the user is present — if they aren't allow-listed, warn that background workers will stall on prompts and suggest `/fewer-permission-prompts`.
+3. **Green baseline.** Build and test commands from the project CLAUDE.md → the plan's Testing section → the active doc's first two acceptance criteria — never the slow end-to-end checks (rule 14). Run them now, quietly (rule 13): red → stop. Running them here also surfaces permission prompts while the user is present — if they aren't allow-listed, warn that background workers will stall on prompts and suggest `/fewer-permission-prompts`.
 4. **Plan** exists (else suggest `/impl-plan`); `draft` → ask "Treat as approved?" — yes sets `approved (<date>)` (the one transition this skill owns).
 5. **Docs** exist for every milestone in scope — else offer `/milestone all` (or the missing ids). Never write milestone docs here.
 6. **Mode per milestone:** the doc's `Execution` → the plan's default → `guided`. In a mixed range, a guided milestone runs on its own; the swarm resumes once it is landed or awaiting a user check.
@@ -52,7 +57,21 @@ Arguments: $ARGUMENTS
    - Refresh recommends a rewrite → halt that milestone and its dependents; continue the rest of the graph.
 8. **Swarm readiness** for swarm milestones: the Swarm-readiness check in the `milestone` skill's `reference/refresh.md`, with undecided `D<n>` counted as failures here. Failure → offer guided mode for that milestone, or stop.
 9. **Forbidden paths:** `git submodule status` + `.gitmodules` paths, plus anything the project CLAUDE.md marks hands-off. They go into every brief.
-10. **Run plan:** milestones · mode each · the stack reviewer (rule 6 — say so when it is the fallback) · first wave (swarm) or first WP (guided) · cap N · expected agent count (nested reviewer agents roughly double concurrent load). Ask "Start?" once (self-invoked runs already asked in rule 3).
+10. **Run plan:** milestones · mode each · how it runs (swarm: the unattended loop by default, or `--step`; guided: in a fresh session after this one) · the stack reviewer (rule 6 — say so when it is the fallback) · workers' model per WP (Sonnet unless the WP says `opus`) · first wave (swarm) or first WP (guided) · cap N · expected agent count (nested reviewer agents roughly double concurrent load). Ask "Start?" once (self-invoked runs already asked in rule 3).
+
+## Unattended (the default for swarm)
+
+**From the interactive session**, after preflight and the design round's `Approve …` commit:
+
+1. Start the loop in the background: `pwsh -NoProfile -File "${CLAUDE_SKILL_DIR}/scripts/implement-loop.ps1" -Scope <the scope typed>`. Tell the user the same command run from a terminal outlives this session, and that `-Stop` ends the loop after the current milestone.
+2. Watch `.implement/loop/loop.log` with Monitor and relay each `DONE` / `LIMIT` / `NEEDS YOU` / `ALL DONE` / `STOP` / `END` line as one line. Never read the `run-<n>.jsonl` transcripts unless a run failed and the user asks.
+3. When it ends, print the run report (as `status` does), leading with what needs the user.
+
+**A session started with `--unattended`** (only the loop does that):
+
+- **Never asks.** Resume without asking. Docs to refresh or approve → `/milestone refresh <id> --autonomous`. Anything "never autonomous" (swarm.md §4) → blocked with a "needs user" follow-up. A guided milestone, a dirty tree outside `.claude/worktrees/` and `.implement/`, or swarm state it can't classify → stop with `needs-user`.
+- **Exactly one milestone:** the first in scope that is `in progress`, else the next eligible one. Run it to landed or `awaiting user check` (never wait for interactive checks), or to a stop condition.
+- **Before ending, write `.implement/loop/state.json`:** `{"milestone": "<M>", "result": "landed|awaiting-check|needs-user|blocked|red|limit|all-done", "sha": "<HEAD>", "summary": "<one line>", "needsUser": ["FU-NNN — <question>"], "resetAt": "<ISO time or null>"}`. Nothing eligible → `all-done`. A usage limit → swarm.md §5's salvage, then `limit` with the reset time if known. Then end — never start the next milestone.
 
 ## Run
 

@@ -25,7 +25,8 @@ Manual end-to-end runbook for the planning, implementation and review skills (`/
 | `milestone` — convention detection | 3, 4 |
 | `milestone` — `mode` | 6 |
 | `implement` — guided, self-invocation gate, dependency check | 5, 9 |
-| `implement` — swarm, resume, salvage, cleanup | 7 |
+| `implement` — swarm, resume, salvage, cleanup, `--step`, per-wave sync | 7 |
+| `implement` — unattended loop (`implement-loop.ps1`, `--unattended`, state file) | 12 |
 | `implement` — merge gates | 8 |
 | `implement` — `status`, forbidden paths | 9 |
 | `followup` — Kind, Why accepted, Revisit when | 1, 2, 5, 7, 9 |
@@ -158,11 +159,13 @@ Commit it (`git commit -am "Switch M2+ to swarm execution"`).
 
 ## Test 7: swarm run, interruption and resume (same scratch folder)
 
+This test drives the coordinator in-session with `--step`; Test 12 covers the unattended loop.
 ```
-/implement all --agents 3
+/implement all --agents 3 --step
 ```
-- [ ] The **up-front design round** asks every undecided `D<n>` across M2+ in batches of four, with a "Decide autonomously" option. Pick that option for at least one question. Then it commits `Approve M2–Mn milestone docs`.
-- [ ] Each milestone's `.0` runs in the main session before any worker starts on that milestone.
+- [ ] The **up-front design round** asks every undecided `D<n>` across M2+ in batches of four, with a "Decide autonomously" option. Pick that option for at least one question. Then it commits `Approve M2–Mn milestone docs` and ends the turn telling you to `/clear` and re-run (design and implementation never share a session). Do that: `/clear`, then `/implement all --agents 3 --step`.
+- [ ] Each milestone's `.0` runs alone as a `wp-worker` before any other worker starts on that milestone; workers run on Sonnet except WPs marked `Model: opus`.
+- [ ] Build and test output never appears in full in the chat — only summary lines.
 - [ ] No more than 3 workers run at once (`git worktree list` in another terminal).
 
 **Interrupt it:** once `git worktree list` shows 2 or more `.claude/worktrees/agent-*` entries, close the Claude window (or kill the process). Check that at least one worktree has uncommitted changes: `git -C .claude/worktrees/agent-<id> status --short`. Then start a new session and type:
@@ -173,7 +176,7 @@ Commit it (`git commit -am "Switch M2+ to swarm execution"`).
 - [ ] A partial worktree gets a `WIP … salvage uncommitted changes after interruption` commit and a relaunched worker. No work package is done twice.
 
 Let it finish. Then check:
-- [ ] Every merge is `Merge <M> WPx.y: …` followed by `Sync docs for <M> WPx.y (<sha>)` (`git log --oneline`). No batched doc syncs.
+- [ ] Every merge is `Merge <M> WPx.y: …`, and every merged WP appears in a later `Sync docs for <M> <WP ids> (<shas>)` commit — one per wave, not one per merge (`git log --oneline`). The overview's WP table marks each `☑ landed (<sha>)`.
 - [ ] Follow-up files in `docs/fu/` are sequential and unique, the generated index lists each one, and the decision you left to the agents appears with `kind: decision`.
 - [ ] `git grep -n FU-TBD -- . ':!.claude' ':!docs'` returns nothing, and no `.implement/` folder exists.
 - [ ] `git worktree list` shows only the main checkout; `git branch --list 'worktree-agent-*'` shows nothing (or only branches the run report lists as **Blocked**).
@@ -219,6 +222,18 @@ claude
 - [ ] A later `/implement` (no arguments) offers the checks again with the exact command; confirming with a quote lands the milestone.
 
 **Read-only status on real repos:** in the untracked `tests.local.md` (see Setup rules) — leftover worktrees, doc drift, and submodules listed as forbidden paths.
+
+## Test 12: unattended loop (same scratch folder, a later swarm milestone still open)
+
+```
+/implement all
+```
+- [ ] After the design round and the `Approve …` commit, it starts `implement-loop.ps1` in the background, says how to run it from a terminal instead and how to stop it (`-Stop`), and relays loop lines (`RUN`, `DONE`, …) one line each.
+- [ ] `.implement/loop/` holds `loop.log`, `state.json` and `run-<n>.jsonl`, and `git status` stays clean (the folder ignores itself).
+- [ ] Each milestone ran in its own session: one `run-<n>.jsonl` per milestone, each starting with a fresh context.
+- [ ] Run `pwsh -NoProfile -File <skills>/implement/scripts/implement-loop.ps1 -Stop` from another terminal: the loop logs `STOP requested`, finishes the current milestone, and ends with `STOPPED on request`.
+- [ ] Running `/implement` while the loop runs reports the running loop instead of starting a second coordinator.
+- [ ] A milestone with only interactive criteria ends as `awaiting-check` and the loop moves on; a "needs user" decision stops the loop with `NEEDS YOU`.
 
 ## Test 10: point-by-point walkthrough
 
