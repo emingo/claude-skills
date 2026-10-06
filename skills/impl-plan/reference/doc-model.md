@@ -84,7 +84,7 @@ Every entry carries a `kind:` (format owned by the `followup` skill):
 
 Use commit SHAs (short, backticked) for evidence; PR numbers only when the project uses PRs.
 
-**Work-package markers** (folder layout: the Status cell of the overview's WP table; single file: inline under the WP heading as `**Status: ☑ landed** (<sha>)`; written by `/implement`): `☑ landed (<sha>)` — merged, not reverted, synced · `**Status: ⛔ blocked** (FU-NNN — <why>)` — waiting on a user decision or after a second failure; `⛔ blocked (stubbed — FU-NNN)` when a fail-loud stub stands in for it. A WP with neither marker is open. A reverted merge or a `Stub …` commit never makes a WP landed.
+**Work-package markers** (folder layout: the Status cell of the overview's WP table; single file: inline under the WP heading as `**Status: ☑ landed** (<sha>)`; written by `/implement`): `☑ landed (<sha>)` — merged and not reverted · `**Status: ⛔ blocked** (FU-NNN — <why>)` — waiting on a user decision or after a second failure; `⛔ blocked (stubbed — FU-NNN)` when a fail-loud stub stands in for it. A WP with neither marker is open. A reverted merge or a `Stub …` commit never makes a WP landed.
 
 **Staleness:** a milestone doc is *stale* when commits since its `Written against` touch code, the plan or the ledger — the doc's own approval and mode-switch commits don't count. Stale `proposed`/`approved` docs get `/milestone refresh` before implementation.
 

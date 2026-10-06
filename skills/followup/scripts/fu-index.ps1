@@ -65,7 +65,8 @@ if ($closed.Count) {
 } else { [void]$sb.AppendLine('None.') }
 
 $text = $sb.ToString() -replace "`r`n", "`n"
-$current = if (Test-Path -LiteralPath $Out) { [IO.File]::ReadAllText([IO.Path]::GetFullPath($Out)) } else { $null }
+# Compared with line endings normalized: git's autocrlf may have checked the index out with CRLF.
+$current = if (Test-Path -LiteralPath $Out) { [IO.File]::ReadAllText([IO.Path]::GetFullPath($Out)) -replace "`r`n", "`n" } else { $null }
 if ($current -ne $text) {
     [IO.File]::WriteAllText([IO.Path]::GetFullPath($Out), $text, [Text.UTF8Encoding]::new($false))
     Write-Host "fu-index: wrote $Out ($($open.Count) open, $($closed.Count) closed)"

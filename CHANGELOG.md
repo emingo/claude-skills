@@ -4,6 +4,21 @@ Every change to the global CLAUDE.md, an agent, or a skill gets an entry here, n
 
 ## 2026-10-05
 
+- **implement, doc-sync, wp-worker, doc-model, milestone, followup, repo** — Fixes from an independent review of today's four commits, made before deploying them.
+  - **Unattended sessions stopped themselves:** resume's new "a loop is running" check fired inside the loop's own sessions. It now applies to interactive sessions only.
+  - **Merges failed mid-wave:** per-wave syncing left the report removal staged, and `git merge` and `git revert` refuse to run with staged changes. Each merge's follow-up bookkeeping is now committed at once (`Record follow-ups for <M> WPx.y`); only the unstaged progress markers wait for the wave's sync commit. Resume handles both leftovers and checks `origin:` so follow-ups aren't recorded twice.
+  - **Just-in-time docs were a dead end:** `/implement` was forbidden to write docs. It now invokes `/milestone <id>` for a startable milestone without one.
+  - **doc-sync's milestone section was stale:** it still set markers and wrote As-built notes under design questions. It now defers markers to `/implement` and writes per-WP notes to `as-built.md`.
+  - **`swarm.md` handed blocked/stub markers to doc-sync:** the coordinator writes them now.
+  - **The loop could be killed:** it was started as a background task, which has a time cap. It now starts detached.
+  - **`implement-loop.ps1` bugs:**
+    - the iteration cap never logged a STOP;
+    - a missing state-file field threw under StrictMode;
+    - reset times mixed UTC and local time;
+    - limit detection grepped the whole transcript, where `429` matches token counts and shas. It now reads only the final `result` event.
+  - **Other:**
+    - `check-test.sh` could hang on an empty glob;
+    - `fu-index.ps1` ignores CRLF when comparing, so an autocrlf checkout doesn't force a rewrite.
 - **implement, global, impl-plan** — The coordinator stops being the most expensive part of a run. In project B's M12 run the main session was 47.5% of the tokens: its context grew from 76k to 353k over 136 turns, because the design round, two hand-implemented work packages, 7 doc-sync briefs and full process listings all stayed in it. In M0–M11, where the session was never cleared, it ran at a median 553k. 27 of M12's 97 minutes went to a baseline consumer smoke that hung.
   - **New rule 13 — keep the coordinator's context small:** workers implement every swarm WP, `.0` included (as `wp-worker`, Opus only where the WP says so). Command output goes to logs, docs are read by section, and briefs carry paths, not content.
   - **New rule 14 — guard slow commands:** no baseline run of slow end-to-end checks, and slow scripts run in the background with `-NoProfile`, a timeout and Monitor.

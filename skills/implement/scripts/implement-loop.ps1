@@ -20,6 +20,18 @@ New-Item -ItemType Directory -Force -Path $dir | Out-Null
 if (-not (Test-Path "$dir/.gitignore")) { Set-Content -NoNewline -Path "$dir/.gitignore" -Value "*`n" }
 $log = "$dir/loop.log"; $state = "$dir/state.json"; $lock = "$dir/loop.lock"; $stopFile = "$dir/stop"
 
+# A state-file field, or $null when the session left it out (StrictMode would throw on a missing property).
+function Get-Field($obj, [string] $name) { $p = $obj.PSObject.Properties[$name]; if ($p) { $p.Value } else { $null } }
+# True when the session's final stream-json "result" event reports a usage/rate limit. Only that event is inspected:
+# grepping the whole transcript would match token counts, shas and code.
+function Test-LimitEnd([string] $path) {
+    $last = Get-Content $path -ErrorAction SilentlyContinue | Where-Object { $_ -match '"type"\s*:\s*"result"' } | Select-Object -Last 1
+    if (-not $last) { return $false }
+    try { $r = $last | ConvertFrom-Json } catch { return $false }
+    $text = "$(Get-Field $r 'subtype') $(Get-Field $r 'result') $(Get-Field $r 'error')"
+    [bool]((Get-Field $r 'is_error') -and $text -match '(usage|rate|session) limit|limit reached|resets? at')
+}
+
 function Write-Log([string] $msg) {
     $line = "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') $msg"
     Add-Content -Path $log -Value $line -Encoding utf8
@@ -53,7 +65,7 @@ try {
 
         if (-not (Test-Path $state)) {
             # No state file: the session died before finishing. A usage limit waits; anything else counts as a failure.
-            if (Select-String -Path $run -Pattern 'usage limit|rate limit|limit reached|429' -Quiet) {
+            if (Test-LimitEnd $run) {
                 if (++$limitWaits -gt $MaxLimitWaits) { Write-Log "STOP — usage limit persisted through $MaxLimitWaits waits"; $code = 1; break }
                 Write-Log "LIMIT — no state file; waiting 30 min (wait $limitWaits/$MaxLimitWaits)"; Start-Sleep -Seconds 1800; $i--; continue
             }
@@ -63,20 +75,22 @@ try {
 
         $s = Get-Content $state -Raw | ConvertFrom-Json
         $failures = 0
-        $line = "$($s.milestone) $($s.result)$(if ($s.sha) { " $($s.sha)" }) — $($s.summary)"
-        switch ($s.result) {
+        $result = Get-Field $s 'result'; $sha = Get-Field $s 'sha'; $needs = Get-Field $s 'needsUser'; $resetAt = Get-Field $s 'resetAt'
+        $line = "$(Get-Field $s 'milestone') $result$(if ($sha) { " $sha" }) — $(Get-Field $s 'summary')"
+        switch ($result) {
             { $_ -in 'landed', 'awaiting-check' } { Write-Log "DONE $line"; continue iter }
             'limit' {
                 if (++$limitWaits -gt $MaxLimitWaits) { Write-Log "STOP — usage limit persisted through $MaxLimitWaits waits"; $code = 1; break iter }
-                $until = if ($s.resetAt) { [datetime]$s.resetAt } else { (Get-Date).AddMinutes(30) }
-                $secs = [math]::Max(60, [int]($until - (Get-Date)).TotalSeconds + 60)
-                Write-Log "LIMIT $line — sleeping until $($until.ToString('HH:mm'))"; Start-Sleep -Seconds $secs; $i--; continue iter
+                # Compare in UTC: ConvertFrom-Json turns an ISO "…Z" time into a UTC DateTime, and DateTime math ignores Kind.
+                $until = if ($resetAt) { ([datetime]$resetAt).ToUniversalTime() } else { [datetime]::UtcNow.AddMinutes(30) }
+                $secs = [math]::Max(60, [int]($until - [datetime]::UtcNow).TotalSeconds + 60)
+                Write-Log "LIMIT $line — sleeping until $($until.ToLocalTime().ToString('HH:mm'))"; Start-Sleep -Seconds $secs; $i--; continue iter
             }
             'all-done' { Write-Log "ALL DONE $line"; break iter }
-            default { Write-Log "NEEDS YOU ($($s.result)) $line$(if ($s.needsUser) { ' · ' + ($s.needsUser -join '; ') })"; $code = 3; break iter }
+            default { Write-Log "NEEDS YOU ($result) $line$(if ($needs) { ' · ' + ($needs -join '; ') })"; $code = 3; break iter }
         }
-        if ($i -eq $MaxIterations) { Write-Log "STOP — reached $MaxIterations iterations"; $code = 1 }
     }
+    if ($i -gt $MaxIterations) { Write-Log "STOP — reached $MaxIterations iterations"; $code = 1 }
 }
 finally {
     Remove-Item $lock -ErrorAction SilentlyContinue

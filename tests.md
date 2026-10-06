@@ -176,7 +176,7 @@ This test drives the coordinator in-session with `--step`; Test 12 covers the un
 - [ ] A partial worktree gets a `WIP … salvage uncommitted changes after interruption` commit and a relaunched worker. No work package is done twice.
 
 Let it finish. Then check:
-- [ ] Every merge is `Merge <M> WPx.y: …`, and every merged WP appears in a later `Sync docs for <M> <WP ids> (<shas>)` commit — one per wave, not one per merge (`git log --oneline`). The overview's WP table marks each `☑ landed (<sha>)`.
+- [ ] Every merge is `Merge <M> WPx.y: …` followed by `Record follow-ups for <M> WPx.y`, and every merged WP appears in a later `Sync docs for <M> <WP ids> (<shas>)` commit — one per wave, not one per merge (`git log --oneline`). The overview's WP table marks each `☑ landed (<sha>)`.
 - [ ] Follow-up files in `docs/fu/` are sequential and unique, the generated index lists each one, and the decision you left to the agents appears with `kind: decision`.
 - [ ] `git grep -n FU-TBD -- . ':!.claude' ':!docs'` returns nothing, and no `.implement/` folder exists.
 - [ ] `git worktree list` shows only the main checkout; `git branch --list 'worktree-agent-*'` shows nothing (or only branches the run report lists as **Blocked**).
@@ -228,11 +228,11 @@ claude
 ```
 /implement all
 ```
-- [ ] After the design round and the `Approve …` commit, it starts `implement-loop.ps1` in the background, says how to run it from a terminal instead and how to stop it (`-Stop`), and relays loop lines (`RUN`, `DONE`, …) one line each.
+- [ ] After the design round and the `Approve …` commit, it starts `implement-loop.ps1` detached (a minimized PowerShell window on Windows), says how to stop it (`-Stop`), and relays loop lines (`RUN`, `DONE`, …) one line each. Closing the session doesn't stop the loop.
 - [ ] `.implement/loop/` holds `loop.log`, `state.json` and `run-<n>.jsonl`, and `git status` stays clean (the folder ignores itself).
 - [ ] Each milestone ran in its own session: one `run-<n>.jsonl` per milestone, each starting with a fresh context.
 - [ ] Run `pwsh -NoProfile -File <skills>/implement/scripts/implement-loop.ps1 -Stop` from another terminal: the loop logs `STOP requested`, finishes the current milestone, and ends with `STOPPED on request`.
-- [ ] Running `/implement` while the loop runs reports the running loop instead of starting a second coordinator.
+- [ ] Running `/implement` in an interactive session while the loop runs reports the running loop instead of starting a second coordinator (the loop's own `--unattended` sessions don't stop on it).
 - [ ] A milestone with only interactive criteria ends as `awaiting-check` and the loop moves on; a "needs user" decision stops the loop with `NEEDS YOU`.
 
 ## Test 10: point-by-point walkthrough

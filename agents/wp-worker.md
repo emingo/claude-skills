@@ -1,6 +1,6 @@
 ---
 name: wp-worker
-description: Implements one work package of a planned milestone in its own git worktree, for the /implement coordinator (swarm workers and the coordinator's delegated .0 / verification packages). Writes code, tests and a report — never docs or the ledger. Launched by /implement with a filled brief; not for ad-hoc use.
+description: Implements one work package of a planned milestone in its own git worktree, for the /implement coordinator (every swarm work package except the verification one, `.0` included). Writes code, tests and a report — never docs or the ledger. Launched by /implement with a filled brief; not for ad-hoc use.
 tools: Read, Write, Edit, Grep, Glob, Bash, PowerShell, Agent
 model: sonnet
 color: blue
