@@ -29,6 +29,9 @@ Manual end-to-end runbook for the planning, implementation and review skills (`/
 | `implement` — `status`, forbidden paths | 9 |
 | `followup` — Kind, Why accepted, Revisit when | 1, 2, 5, 7, 9 |
 | `doc-sync` — milestone markers, landing rules, drift repair | 5, 7, 8, 9 |
+| `wp-worker` — narrow reads, quiet commands, reviewer by diff | 7 |
+| Stack reviewers — git-only Bash, `light` / `full` depth | 5, 7 |
+| `doc-sync` — reading budget (sections only, no generated index) | 5, 7 |
 | `walkthrough` — agenda, per-point picker, new ideas mid-review, log, resume, apply, plan mode | 10 |
 | `walkthrough` — tour mode (document, repo), notes, no over-triggering | 11 |
 | Global CLAUDE.md — offer a tour for large docs / whole repos | 11 |

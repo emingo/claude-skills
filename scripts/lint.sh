@@ -25,7 +25,8 @@ for a in agents/*.md; do
   [[ -n $(front "$a" description) ]] || fail "$a" "no description"
   [[ -n $(front "$a" color) ]] || fail "$a" "no color"
   if [[ $n == *reviewer ]]; then
-    [[ $tools == "Read, Grep, Glob" && -z $model ]] || fail "$a" "reviewers are read-only (tools: Read, Grep, Glob) and omit model"
+    [[ $tools == "Read, Grep, Glob, Bash" && -z $model ]] || fail "$a" "reviewers have tools: Read, Grep, Glob, Bash (git reads only) and omit model"
+    grep -q '^## Getting the change' "$a" || fail "$a" "reviewers need the 'Getting the change' section (git-only Bash, review depth)"
   elif [[ $tools == *Write* || $tools == *Edit* ]]; then
     [[ $model == sonnet ]] || fail "$a" "agents that write files use model: sonnet"
   fi

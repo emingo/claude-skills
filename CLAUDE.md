@@ -57,8 +57,8 @@ Files reference each other by name. When you rename or change one, update the ot
 ## Authoring conventions
 
 - **`description` drives auto-delegation and skill triggering.** Say *when* to use the agent or skill, including trigger phrases. "Use proactively …" marks agents Claude should launch unprompted.
-- **Reviewers** are read-only (`tools: Read, Grep, Glob`) and omit `model`, so they inherit the main model. They share one shape: categorized checks → rules → fixed output format → "What NOT to do".
-- **Agents that write files** (`doc-sync`, `docs-writer`, `refactorer`, `test-writer`) get `model: sonnet` plus Write/Edit, and Bash where they need git or test runs.
+- **Reviewers** don't change anything: `tools: Read, Grep, Glob, Bash`, where Bash is only for reading git (`diff`/`show`/`log`/`status`) — their shared "Getting the change" section says so and sets the review depth (`full` / `light`). They omit `model`, so they inherit the main model. They share one shape: getting the change → categorized checks → rules → fixed output format → "What NOT to do".
+- **Agents that write files** (`doc-sync`, `docs-writer`, `refactorer`, `test-writer`, `wp-worker`) get `model: sonnet` plus Write/Edit, and Bash where they need git or test runs. `/implement` overrides `wp-worker` to Opus per work package (`Model: opus` in the WP).
 - **Every agent** has a `color`.
 - **A skill's directory name** must match its frontmatter `name`, which is the `/command` users type.
 - **Heavy user-triggered skills** that write many files use `disable-model-invocation: true` (e.g. `impl-plan`); leave it off when Claude should be able to chain into the skill (e.g. `milestone`, which `impl-plan` hands off to and Claude runs as `refresh` before implementing). `implement` is model-invocable too, behind a gate in its own hard rules: self-invoked, it runs guided on one milestone and asks before the first commit; swarm/ranges need the user's explicit `/implement`.
