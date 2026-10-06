@@ -4,6 +4,7 @@ Every change to the global CLAUDE.md, an agent, or a skill gets an entry here, n
 
 ## 2026-10-05
 
+- **repo** — Fixes `defender-dev-exclusions.ps1` failing at the end of a run with "The property 'Count' cannot be found". An `if` statement whose branch outputs an empty array yields `$null`, which StrictMode refuses to count. The verification result and the process list are now wrapped in `@()`. The exclusions were already applied before the error, since only the final check failed.
 - **implement, wp-worker, repo** — Parallel .NET builds were slow in a swarm on another project. Up to N workers plus the coordinator each build with every core, so the CPU is oversubscribed, and `dotnet test` rebuilt what `dotnet build` had just built.
   - Briefs and the coordinator now cap each build at `max(1, cores ÷ (workers + 1))` jobs (`dotnet build -m:<n>`), and skip work already done (`test --no-build`, `--no-restore` after a worktree's first restore). `wp-worker` must keep the brief's flags.
   - The companion change is outside this repo: the global `settings.json` `env` now sets `MSBUILDDISABLENODEREUSE=1`, `MSBUILDTERMINALLOGGER=off` and the .NET telemetry/logo opt-outs for every command Claude runs. Lingering MSBuild nodes from parallel builds held files and output pipes open — the likely cause of project B's 27-minute consumer-smoke hang (unverified).

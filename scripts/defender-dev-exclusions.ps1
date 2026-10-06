@@ -32,7 +32,7 @@ $haveX = @($pref.ExclusionProcess | Where-Object { $_ })
 if ($haveP -contains 'N/A: Must be an administrator to view exclusions') { throw 'Run this from an elevated (administrator) pwsh.' }
 
 $wantP = @($Paths | Where-Object { $_ } | ForEach-Object { $_.TrimEnd('\') })
-$wantX = if ($Processes) { $procs } else { @() }
+$wantX = @(if ($Processes) { $procs })
 
 foreach ($p in $wantP) {
     $present = $haveP -contains $p
@@ -59,8 +59,9 @@ foreach ($x in $wantX) {
 # Tamper protection or an organization policy can silently ignore local changes — confirm they took.
 if (-not $WhatIfPreference) {
     $now = Get-MpPreference
-    $missing = if ($Remove) { @($wantP + $wantX | Where-Object { $now.ExclusionPath -contains $_ -or $now.ExclusionProcess -contains $_ }) }
-               else { @($wantP | Where-Object { (Test-Path -LiteralPath $_) -and $now.ExclusionPath -notcontains $_ }) + @($wantX | Where-Object { $now.ExclusionProcess -notcontains $_ }) }
+    # @(...) around the whole if: an if statement that outputs an empty array yields $null, and StrictMode rejects $null.Count
+    $missing = @(if ($Remove) { @($wantP + $wantX | Where-Object { $now.ExclusionPath -contains $_ -or $now.ExclusionProcess -contains $_ }) }
+               else { @($wantP | Where-Object { (Test-Path -LiteralPath $_) -and $now.ExclusionPath -notcontains $_ }) + @($wantX | Where-Object { $now.ExclusionProcess -notcontains $_ }) })
     if ($missing.Count) { Write-Warning "Not applied (policy or tamper protection?): $($missing -join ', ')"; exit 1 }
     Write-Host 'Done. Defender exclusions are in effect immediately.'
 }
