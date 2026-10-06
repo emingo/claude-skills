@@ -4,6 +4,10 @@ Every change to the global CLAUDE.md, an agent, or a skill gets an entry here, n
 
 ## 2026-10-05
 
+- **implement, wp-worker, repo** — Parallel .NET builds were slow in a swarm on another project. Up to N workers plus the coordinator each build with every core, so the CPU is oversubscribed, and `dotnet test` rebuilt what `dotnet build` had just built.
+  - Briefs and the coordinator now cap each build at `max(1, cores ÷ (workers + 1))` jobs (`dotnet build -m:<n>`), and skip work already done (`test --no-build`, `--no-restore` after a worktree's first restore). `wp-worker` must keep the brief's flags.
+  - The companion change is outside this repo: the global `settings.json` `env` now sets `MSBUILDDISABLENODEREUSE=1`, `MSBUILDTERMINALLOGGER=off` and the .NET telemetry/logo opt-outs for every command Claude runs. Lingering MSBuild nodes from parallel builds held files and output pipes open — the likely cause of project B's 27-minute consumer-smoke hang (unverified).
+  - New `scripts/defender-dev-exclusions.ps1` (machine setup, run by hand as admin) excludes the dev root and the NuGet and tool caches from Defender's real-time scan. Process exclusions are opt-in, and `-WhatIf`/`-Remove` are supported. A Dev Drive is the safer alternative.
 - **implement, doc-sync, wp-worker, doc-model, milestone, followup, repo** — Fixes from an independent review of today's four commits, made before deploying them.
   - **Unattended sessions stopped themselves:** resume's new "a loop is running" check fired inside the loop's own sessions. It now applies to interactive sessions only.
   - **Merges failed mid-wave:** per-wave syncing left the report removal staged, and `git merge` and `git revert` refuse to run with staged changes. Each merge's follow-up bookkeeping is now committed at once (`Record follow-ups for <M> WPx.y`); only the unstaged progress markers wait for the wave's sync commit. Resume handles both leftovers and checks `origin:` so follow-ups aren't recorded twice.

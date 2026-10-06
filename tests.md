@@ -166,6 +166,7 @@ This test drives the coordinator in-session with `--step`; Test 12 covers the un
 - [ ] The **up-front design round** asks every undecided `D<n>` across M2+ in batches of four, with a "Decide autonomously" option. Pick that option for at least one question. Then it commits `Approve M2–Mn milestone docs` and ends the turn telling you to `/clear` and re-run (design and implementation never share a session). Do that: `/clear`, then `/implement all --agents 3 --step`.
 - [ ] Each milestone's `.0` runs alone as a `wp-worker` before any other worker starts on that milestone; workers run on Sonnet except WPs marked `Model: opus`.
 - [ ] Build and test output never appears in full in the chat — only summary lines.
+- [ ] Worker briefs carry capped build commands (`dotnet build -m:<n>` with `<n>` ≈ cores ÷ (workers + 1), `dotnet test --no-build`).
 - [ ] No more than 3 workers run at once (`git worktree list` in another terminal).
 
 **Interrupt it:** once `git worktree list` shows 2 or more `.claude/worktrees/agent-*` entries, close the Claude window (or kill the process). Check that at least one worktree has uncommitted changes: `git -C .claude/worktrees/agent-<id> status --short`. Then start a new session and type:

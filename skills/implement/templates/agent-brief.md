@@ -6,7 +6,7 @@ Approved Stack (the only packages you may use): <list>
 Open follow-ups touching your files (cite, don't re-report): <FU ids, or "none">
 Forbidden paths (never edit): <submodules, other repos, project hands-off paths>
 Testing approach: <smoke | detailed unit | TDD>
-Build/test commands (log to a file, print the summary lines): <commands>
+Build/test commands (log to a file, print the summary lines): <commands, with the parallelism cap and skip flags from swarm.md — e.g. `dotnet build -m:3` (add `--no-restore` once this worktree has restored), `dotnet test --no-build`>
 Stack reviewer: <agent> · review depth: <full | light, from the WP>
 <Retry only: the previous report's location on its branch + the failure output (trimmed to the relevant lines), and either "first run `git merge <old branch>`" (never merged) or "first run `git revert <revert sha>`" (merged then reverted), then continue>
 
