@@ -2,6 +2,16 @@
 
 Every change to the global CLAUDE.md, an agent, or a skill gets an entry here, newest first. Record the *why* — the git diff already shows the what.
 
+## 2026-10-07
+
+- **implement, wp-worker, milestone, doc-model** — A swarm run should be mostly Sonnet, and it wasn't. In project A's 2026-10-06 run, Opus was about $31 of $39.5 across six logged sessions, although workers already defaulted to Sonnet.
+  - **The coordinator ran on Opus:** `implement-loop.ps1` had a `-Model` parameter that nothing passed, so every headless session took the CLI default. The script now defaults to Sonnet, `/implement --model <m>` overrides it, and the log's `START`/`RUN` lines name the model. The design round stays in the user's interactive session, so the decisions that need judgment are made before the loop starts.
+  - **Reviewers inherited:** they have no `model`, so each review ran on whatever launched it. Every launch site now sets it from the WP's `Review:` depth — `full` → Opus, `light` → Sonnet. The agents' frontmatter is unchanged.
+  - **Too many `Model: opus` WPs:** 5 of about 13 worker launches. The criteria named kinds of code ("tricky lifetime or concurrency logic"), which a doc writer applies generously. `opus` now needs a design choice the doc doesn't settle; hard logic against a frozen contract is `sonnet` with `Review: full`. `/milestone` reports a doc with more than a third of its WPs on `opus`.
+  - **`.0` was reviewed twice** in two milestones, by its worker and again by the coordinator. The merge step now says a WP whose report shows a review is never reviewed again.
+  - **Retries escalated regardless of cause:** a retry keeps the WP's model after a mechanical failure and moves to Opus only when a Sonnet worker's build, tests or logic failed.
+  - **`DONE` lines carry cost per model**, read from the session's final `result` event, so the next run shows what ran on what without opening a transcript.
+
 ## 2026-10-05
 
 - **repo** — Fixes `defender-dev-exclusions.ps1` failing at the end of a run with "The property 'Count' cannot be found". An `if` statement whose branch outputs an empty array yields `$null`, which StrictMode refuses to count. The verification result and the process list are now wrapped in `@()`. The exclusions were already applied before the error, since only the final check failed.

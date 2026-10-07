@@ -1,7 +1,8 @@
 #Requires -Version 7.0
 # Unattended multi-milestone driver for /implement: one fresh headless Claude session per milestone, so no session
 # carries one milestone's context into the next. Sessions hand off only through git, the docs and a small state file.
-#   pwsh -NoProfile -File implement-loop.ps1 [-Scope all|next|<id>..<id>] [-MaxIterations 20] [-Model <model>]
+#   pwsh -NoProfile -File implement-loop.ps1 [-Scope all|next|<id>..<id>] [-MaxIterations 20] [-Model sonnet]
+# -Model is the coordinator's model; workers and reviewers get theirs per work package.
 #   pwsh -NoProfile -File implement-loop.ps1 -Stop      # stop cleanly after the current milestone
 # Run from the repo root. Files live in .implement/loop/ (self-ignored, so the tree stays clean):
 #   loop.log (one line per event) · state.json (written by each session) · run-<n>.jsonl (each session's stream)
@@ -9,7 +10,7 @@ param(
     [string] $Scope = 'all',
     [int] $MaxIterations = 20,
     [int] $MaxLimitWaits = 12,
-    [string] $Model,
+    [string] $Model = 'sonnet',
     [switch] $Stop
 )
 $ErrorActionPreference = 'Stop'
@@ -32,6 +33,16 @@ function Test-LimitEnd([string] $path) {
     [bool]((Get-Field $r 'is_error') -and $text -match '(usage|rate|session) limit|limit reached|resets? at')
 }
 
+# Cost per model from the session's final "result" event, e.g. " · cost claude-sonnet-5-5 $1.41, claude-opus-5-5 $0.80".
+function Get-ModelCost([string] $path) {
+    $last = Get-Content $path -ErrorAction SilentlyContinue | Where-Object { $_ -match '"type"\s*:\s*"result"' } | Select-Object -Last 1
+    if (-not $last) { return '' }
+    try { $usage = Get-Field ($last | ConvertFrom-Json) 'modelUsage' } catch { return '' }
+    if (-not $usage) { return '' }
+    $parts = $usage.PSObject.Properties | ForEach-Object { '{0} ${1:0.00}' -f $_.Name, [double](Get-Field $_.Value 'costUSD') }
+    if ($parts) { ' · cost ' + ($parts -join ', ') } else { '' }
+}
+
 function Write-Log([string] $msg) {
     $line = "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') $msg"
     Add-Content -Path $log -Value $line -Encoding utf8
@@ -49,7 +60,7 @@ Remove-Item $stopFile -ErrorAction SilentlyContinue
 
 $failures = 0; $limitWaits = 0; $code = 0
 try {
-    Write-Log "START scope=$Scope max=$MaxIterations"
+    Write-Log "START scope=$Scope max=$MaxIterations model=$Model"
     # break/continue inside a PowerShell switch act on the switch, so the loop is labeled
     :iter for ($i = 1; $i -le $MaxIterations; $i++) {
         if (Test-Path $stopFile) { Write-Log 'STOPPED on request'; break }
@@ -58,7 +69,7 @@ try {
         $claudeArgs = @('-p', "/implement $Scope --unattended", '--output-format', 'stream-json', '--verbose',
                   '--permission-prompts', 'none', '--strict-mcp-config', '--name', "implement loop $i")
         if ($Model) { $claudeArgs += @('--model', $Model) }
-        Write-Log "RUN $i — claude -p '/implement $Scope --unattended' → $run"
+        Write-Log "RUN $i — claude -p '/implement $Scope --unattended' --model $Model → $run"
         $global:LASTEXITCODE = 0
         & claude @claudeArgs *> $run
         $exit = $LASTEXITCODE
@@ -78,7 +89,7 @@ try {
         $result = Get-Field $s 'result'; $sha = Get-Field $s 'sha'; $needs = Get-Field $s 'needsUser'; $resetAt = Get-Field $s 'resetAt'
         $line = "$(Get-Field $s 'milestone') $result$(if ($sha) { " $sha" }) — $(Get-Field $s 'summary')"
         switch ($result) {
-            { $_ -in 'landed', 'awaiting-check' } { Write-Log "DONE $line"; continue iter }
+            { $_ -in 'landed', 'awaiting-check' } { Write-Log "DONE $line$(Get-ModelCost $run)"; continue iter }
             'limit' {
                 if (++$limitWaits -gt $MaxLimitWaits) { Write-Log "STOP — usage limit persisted through $MaxLimitWaits waits"; $code = 1; break iter }
                 # Compare in UTC: ConvertFrom-Json turns an ISO "…Z" time into a UTC DateTime, and DateTime math ignores Kind.

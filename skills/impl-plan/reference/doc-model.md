@@ -131,7 +131,7 @@ What "swarm-ready" requires of every milestone doc:
 - Contracts consumed across WPs are specified as code blocks in Contracts introduced, so parallel WPs code against the same shape.
 - Workers never edit the plan, milestone docs, index, ledger, README or CLAUDE.md.
 
-Every WP also declares **`Model:`** — `sonnet` (default: frozen contract, named files, decided questions) or `opus` (new public API design, a `[VERIFY]` or research into a third-party library, tricky lifetime or concurrency logic) — and **`Review:`** — `full` (library or public code, concurrency, lifetimes) or `light` (sandbox, demo, tool or test-only code).
+Every WP also declares **`Model:`** — `sonnet` (default) or `opus`, only when the WP must make a design choice the doc doesn't settle: an open `[VERIFY]` or research into a third-party library, or a public API whose shape isn't given as a contract code block. Hard logic against a frozen contract (concurrency, lifetimes) is `sonnet` with `Review: full`, not `opus` — expect at most a third of a milestone's WPs on `opus`. **`Review:`** — `full` (library or public code, concurrency, lifetimes; reviewed on Opus) or `light` (sandbox, demo, tool or test-only code; reviewed on Sonnet).
 
 ## Links
 

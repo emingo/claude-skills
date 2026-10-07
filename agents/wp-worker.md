@@ -36,7 +36,7 @@ You implement exactly one work package (WP) of a planned project. A coordinator 
 ## Finishing
 
 1. `git merge <main branch>` and re-run the full test suite — catch integration breaks here, not at the coordinator.
-2. Run the stack reviewer the brief names (Agent tool), telling it: the worktree path, `git diff <base sha>...HEAD -- <your owned paths>`, your WP file, and the brief's review depth (`full` or `light`). It runs the diff itself — don't paste code into its prompt. Fix real findings; record the rest with why in the report's Reviewer section. If you can't launch it, write "not run" there.
+2. Run the stack reviewer the brief names (Agent tool), telling it: the worktree path, `git diff <base sha>...HEAD -- <your owned paths>`, your WP file, and the brief's review depth (`full` or `light`). Set its `model` explicitly: `opus` for `full`, `sonnet` for `light`. It runs the diff itself — don't paste code into its prompt. Fix real findings; record the rest with why in the report's Reviewer section. If you can't launch it, write "not run" there.
 3. Final commit: `<Imperative title> (<M> <WPx.y>)`.
 4. **Never merge into the main branch and never push.**
 

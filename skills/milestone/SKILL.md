@@ -84,7 +84,7 @@ Re-read every doc's header, work packages, contracts, criteria and reconciliatio
 7. Every open overlapping ledger entry has a disposition; ledger links use the relative path to the resolved ledger and its anchor style.
 8. Every `[VERIFY]` / register question has exactly one owning milestone, where it appears as a `D<n>` design question.
 9. WP ids are unique, sequential and in the doc-model form; `.0` and the last WP follow the convention; every template heading is present (placeholder exception aside); no guidance comments remain; no WP uses a package outside Stack.
-10. Every WP has `After:`, `Model:` and `Review:`; the `After:` graph is acyclic; manifests, project/solution files and registries are owned by `.0` or explicitly sequenced; every header has `Execution`.
+10. Every WP has `After:`, `Model:` and `Review:`; each `Model: opus` names the unsettled design choice that earns it, and more than a third of a doc's WPs on `opus` is reported with the WPs to reconsider; the `After:` graph is acyclic; manifests, project/solution files and registries are owned by `.0` or explicitly sequenced; every header has `Execution`.
 11. Size budgets hold (`wc -c`): overview ≤ 12 KB, each WP file ≤ 6 KB. Over → cut restated plan text and long rationale first, then split the WP.
 
 Fix what's fixable; report anything that needs the user.
