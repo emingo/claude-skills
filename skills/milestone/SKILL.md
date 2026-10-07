@@ -11,13 +11,13 @@ Arguments: $ARGUMENTS
 
 ## Hard rules
 
-- **Read `${CLAUDE_SKILL_DIR}/../impl-plan/reference/doc-model.md` first** — doc roles, convention detection, ids, status words and who changes them, header fields, links, content rules, style. Everything below assumes it.
+- **Read `${CLAUDE_SKILL_DIR}/../impl-plan/reference/doc-model.md` and `doc-authoring.md` (same folder) first** — doc roles, layout, status words and who changes them; convention detection, ids, header fields, links, content rules, style. Everything below assumes them.
 - **Never edit a landed doc** (`☑ landed`). Point the user at a dated As-built correction or a new milestone instead.
 - **Never touch an `in progress` doc** except on an explicit `refresh <id>` from the user — and then never change its Status — or via `mode`, which changes only its `Execution` field (for the remaining WPs).
 - **Never overwrite an existing doc wholesale** — that's what `refresh` is for.
 - **Never commit.** Suggest the commit message at the end.
 - **Never create the ledger or write entries by hand** — `/followup` only.
-- **Stay within the size budgets** (doc-model, Milestone doc layouts): overview ≤ 12 KB, each WP file ≤ 6 KB. Reference the plan by `§`, put a decision's reasoning in one line, and split a WP that won't fit.
+- **Stay within the size budgets** (doc-model, Milestone doc layout): overview ≤ 12 KB, each WP file ≤ 6 KB. Reference the plan by `§`, put a decision's reasoning in one line, and split a WP that won't fit.
 - **Never delete a template heading** (`None — <reason>`); strip every `<!-- guidance -->` comment. Sole exception: the `<Project obligation>` placeholder becomes the Section profile's sections, or is removed when the profile is "Default sections only".
 - **No work package introduces a dependency outside the plan's Stack.** If one is needed, ask the user (what it does / the no-dependency alternative) before drafting, and edit Stack only on approval.
 - **Skeleton fields are the main agent's alone:** dependencies, work-package file ownership, contracts, acceptance criteria, Section profile. Drafting subagents may object, never change them.
@@ -25,7 +25,7 @@ Arguments: $ARGUMENTS
 
 ## Load (every mode)
 
-1. Conventions profile per doc-model.md (print it in five lines on first use this session).
+1. Conventions profile per doc-authoring.md (print it in five lines on first use this session).
 2. The plan — header (incl. `Execution`; missing → `guided`), Decisions, Stack, Conventions, Milestones section and dependency graph, Testing strategy, assumption register. No plan → stop and suggest `/impl-plan`. No testing strategy in the plan → ask the three-option testing question (smoke / detailed unit / TDD) once.
 3. The milestone index (if any) and the header block of each existing milestone doc (Status, Depends on, Blocks, Execution, Written against).
 4. The ledger's open entries — grep the entry folder's front matter (doc-model "Finding entries"); never the generated index.
@@ -40,7 +40,7 @@ Dependencies come from each doc's `Depends on`, or from the plan's dependency gr
 | Arguments | Behavior |
 |---|---|
 | *(none)* | No milestone docs yet → `all`. Otherwise **read-only**: print a status table (id · doc · Status · Execution · Written against · blocked by) and suggest `next`. |
-| `all` | **Just in time:** write docs (steps A–E) only for milestones that can start soon — the first milestone in plan order that isn't landed or awaiting a check, the ones that can run alongside it, and at most two more beyond those whose dependencies are among them. Every other gate stays `not written`, and the report says `/milestone next` — or `/implement`, which invokes this skill for a startable milestone without a doc — writes it when it comes up. `all --full` writes every missing doc, as before. Then the index. Existing docs are read into the skeleton as fixed rows; unlanded ones are listed with an offer to refresh. |
+| `all` | **Just in time:** write docs (steps A–E) only for milestones that can start soon — the first milestone in plan order that isn't landed or awaiting a check, the ones that can run alongside it, and at most two more beyond those whose dependencies are among them. Every other gate stays `not written`, and the report says `/milestone next` — or `/implement`, which invokes this skill for a startable milestone without a doc — writes it when it comes up. `all --full` writes every missing doc. Then the index. Existing docs are read into the skeleton as fixed rows; unlanded ones are listed with an offer to refresh. |
 | `<id>` | Case-insensitive, normalized to the project's scheme (`m3` → `M3`). If it names a split parent (`M3` with `M3a`/`M3b`): parallel halves → act on each; sequential → the first unlanded half. Then: no doc → write it (single-doc path below); `proposed`/`approved` → `refresh`; `in progress (WP…)` → report it as the active milestone and its first open WP; `awaiting user check` → say so and suggest `/implement <id>` to confirm the checks; landed → refuse. Unknown id → list valid ids. |
 | `next` | If a milestone is `in progress (WP…)`, report it (and its first open WP) as active and stop. Report milestones `awaiting user check` as such and pass over them. Otherwise take the first milestone in plan order that isn't landed or awaiting a check and whose dependencies are landed or awaiting a check → write it (no doc) or refresh it. Also list other milestones eligible to run alongside. Nothing eligible: all landed → say so and suggest setting the plan `implemented`; else print the status table with blockers. |
 | `mode <guided\|swarm> <target>` | Switch execution mode — see `mode` below. |
@@ -55,7 +55,7 @@ Build one table covering every milestone being written before any doc is written
 - id + slug; split proposals (a/b, parallel or sequential) — **ask the user** before splitting, since it changes the gate structure;
 - Depends on / Blocks / Can run alongside;
 - `Execution`: the plan's default (existing docs keep theirs);
-- work packages `WP<n>.0` … `WP<n>.N` (id form per doc-model): `.0` apply reviewer decisions, confirm entry criteria, and pre-edit the shared hotspots (package refs, project/solution files, registries); last = verification + doc-sync + ledger; each with **`After:`**, **files owned**, **`Model:`** and **`Review:`** (doc-model's rules) and gating notes — swarm-ready per doc-model's Execution modes, whatever the mode;
+- work packages `WP<n>.0` … `WP<n>.N` (id form per doc-authoring): `.0` apply reviewer decisions, confirm entry criteria, and pre-edit the shared hotspots (package refs, project/solution files, registries); last = verification + doc-sync + ledger; each with **`After:`**, **files owned**, **`Model:`** and **`Review:`** (doc-model's rules) and gating notes — swarm-ready per doc-model's Execution modes, whatever the mode;
 - contracts introduced and consumed;
 - acceptance criteria expanded from the plan gate (build/test gates first; repeat grep-able conventions);
 - which `[VERIFY]` tags / register questions each milestone owns (each becomes a `D<n>` design question);
@@ -83,7 +83,7 @@ Re-read every doc's header, work packages, contracts, criteria and reconciliatio
 6. Every plan acceptance bullet is covered by the doc's criteria (for a split, by the pair together).
 7. Every open overlapping ledger entry has a disposition; ledger links use the relative path to the resolved ledger and its anchor style.
 8. Every `[VERIFY]` / register question has exactly one owning milestone, where it appears as a `D<n>` design question.
-9. WP ids are unique, sequential and in the doc-model form; `.0` and the last WP follow the convention; every template heading is present (placeholder exception aside); no guidance comments remain; no WP uses a package outside Stack.
+9. WP ids are unique, sequential and in the doc-authoring form; `.0` and the last WP follow the convention; every template heading is present (placeholder exception aside); no guidance comments remain; no WP uses a package outside Stack.
 10. Every WP has `After:`, `Model:` and `Review:`; each `Model: opus` names the unsettled design choice that earns it, and more than a third of a doc's WPs on `opus` is reported with the WPs to reconsider; the `After:` graph is acyclic; manifests, project/solution files and registries are owned by `.0` or explicitly sequenced; every header has `Execution`.
 11. Size budgets hold (`wc -c`): overview ≤ 12 KB, each WP file ≤ 6 KB. Over → cut restated plan text and long rationale first, then split the WP.
 
@@ -112,8 +112,8 @@ Targets: `<id>` (one milestone; a split parent means both halves) · `from <id>`
 
 ## Single-doc path (`<id>`, `next`)
 
-Same as `all` steps A–E for one milestone: the skeleton row is built fresh for the target; neighbours' rows come from their docs, or from the plan graph where they have none. Consistency checks 2–9 apply to the target and its direct neighbours. The index gains (or is created with) the new row only.
+Same as `all` steps A–E for one milestone: the skeleton row is built fresh for the target; neighbours' rows come from their docs, or from the plan graph where they have none. Consistency checks 2–11 apply to the target and its direct neighbours. The index gains (or is created with) the new row only.
 
-## Doc lifecycle after this skill
+## After this skill
 
-`/implement` drives implementation (guided or swarm, per each doc's `Execution`), writes the routine progress markers itself (`in progress (WPx.n)`, the gate/header `in progress`, WP `☑ landed` / `⛔ blocked`), and invokes doc-sync after each guided WP and once per merged swarm wave. `doc-sync` owns the evidence-backed updates, per doc-model's "Who changes what": ticking criteria, the as-built record, `☑ landed`, `implemented`. When landed work makes a later pre-written doc stale, doc-sync reports it instead of editing it — the cue for `/milestone refresh <id>`. Before starting implementation of a milestone whose doc is `proposed`, or `approved` but stale (doc-model's staleness rule), run `refresh` first, unprompted. Never refresh the doc you're currently implementing just because new commits exist.
+`/implement` implements the docs; who changes which status from then on is doc-model's "Who changes what". Before starting implementation of a milestone whose doc is `proposed`, or `approved` but stale (doc-model's staleness rule), run `refresh` first, unprompted. Never refresh the doc you're currently implementing just because new commits exist.

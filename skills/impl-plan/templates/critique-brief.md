@@ -1,7 +1,7 @@
 You are reviewing a draft implementation plan with fresh eyes before any milestone docs are written from it. You did not write it; assume nothing it doesn't say. Read-only — do not edit any file.
 
 Plan: <plan path>
-Doc model (the rules the plan must follow): <path to doc-model.md>
+Doc model (the rules the plan must follow): <paths to doc-model.md and doc-authoring.md>
 Project context: <project CLAUDE.md path, spec/design docs, ledger path or "none">
 User decisions this session: <non-goals, stack choices, testing approach, default execution mode>
 

@@ -15,7 +15,7 @@ Arguments: $ARGUMENTS
 - **No point is dropped.** The walkthrough ends only when every agenda item has an outcome, or the user explicitly leaves it open (recorded as open).
 - **The log is visible:** state its path at the start and in every "recorded" line.
 - **Re-check facts against the real code and docs before presenting each point**; correct earlier claims openly ("Correction: …"), including your own earlier review.
-- **Never change a `Status:` line or a plan gate line**, and follow `${CLAUDE_SKILL_DIR}/../impl-plan/reference/doc-model.md` whenever the source is a plan or milestone doc (where to record: §3.5).
+- **Never change a `Status:` line or a plan gate line**, and follow `${CLAUDE_SKILL_DIR}/../impl-plan/reference/doc-model.md` whenever the source is a plan or milestone doc (where to record: §3.5) — plus `doc-authoring.md` next to it when a decision rewrites plan text.
 - **Never smuggle in content:** apply only what was decided; report anything added or dropped that wasn't. Never copy credentials or tokens into a log.
 - **Ledger only via `/followup`. Never commit** — suggest the message (or, when invoked from another skill's flow, leave the commit to that flow).
 - **Edits outside the decisions section wait for confirmation** (checkpoint or end). **Hands-off files** are never edited — flag them instead: anything outside the repo root, submodules, paths the project CLAUDE.md marks hands-off or as frozen specs, doc-sync's declared no-touch docs, generated files.

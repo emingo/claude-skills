@@ -7,7 +7,7 @@ This session is the **coordinator**: it launches `wp-worker` agents for every wo
 A work package is **eligible** when all hold:
 - its milestone doc is `approved` or `in progress`;
 - every milestone it depends on is landed or awaiting a user check;
-- every WP in its `After:` list is **landed** (doc-model: merged, not reverted, marked `☑ landed` by doc-sync) — and every non-`.0` WP is implicitly After `WP<n>.0`;
+- every WP in its `After:` list is **landed** (doc-model: merged, not reverted, marked `☑ landed`) — and every non-`.0` WP is implicitly After `WP<n>.0`;
 - none of its files owned are owned by a running WP;
 - it carries no `⛔ blocked` marker in the overview's WP table.
 

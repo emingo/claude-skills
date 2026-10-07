@@ -39,7 +39,7 @@ Manual end-to-end runbook for the planning, implementation and review skills (`/
 | Global CLAUDE.md — offer a tour for large docs / whole repos | 11 |
 | `milestone` — refresh hands >4 open questions to `/walkthrough` | 10 |
 | Global CLAUDE.md — offer `/walkthrough` for 5+ points | 10 |
-| `impl-plan/reference/doc-model.md` | all |
+| `impl-plan/reference/doc-model.md`, `doc-authoring.md`, `doc-sync-plan.md` | all |
 
 Tests 3 and 4 and part of 9 are in `tests.local.md`.
 
@@ -108,7 +108,7 @@ Then **start a new session**. Find the milestone whose doc deals with heading an
 - [ ] If M2 consumes the slug contract, it flags the signature mismatch.
 - [ ] It lists one bullet per changed section for the commit message (no Refresh log in the doc), and updates the Written-against SHA.
 - [ ] It asks you M2's `D<n>` questions (proposal vs alternative), rewrites each `D<n>` bullet in `overview.md` to its decided form (`<chosen>. Rejected: … (<date>, user)`), and sets both the doc and the plan gate to `approved (date)`.
-- [ ] It does **not** set `in progress`; that's doc-sync's job once work lands.
+- [ ] It does **not** set `in progress`; that's `/implement`'s job when work starts.
 
 Commit the result (`git add -A; git commit -m "Refresh M2"`) and revert the drift so it doesn't confuse later tests: `git revert --no-edit HEAD~1`.
 
@@ -241,7 +241,7 @@ claude
 
 In `scratch-plantest` with Test 1's plan and milestone docs, **on a throwaway branch** so the other tests' state isn't touched: `git switch -c t10 <commit with Test 1's docs>` (discard it afterwards with `git switch - ; git branch -D t10`). Accept edits for the session when Claude suggests it. Pick a milestone with several undecided `D<n>`, e.g. M2. New session:
 ```
-/walkthrough docs/milestones/M2-<slug>.md#Design questions
+/walkthrough docs/milestones/M2-<slug>/overview.md#Decisions
 ```
 - [ ] It shows an agenda table (`# · ID · point · recommendation · ⚖/✓`), keeps the doc's own labels (`D1`, `D2`…) as IDs, names the mode (decide), and asks once how to proceed. Choose **One by one**.
 - [ ] It creates `docs/reviews/<date>-<slug>.md` and prints its path.

@@ -4,6 +4,12 @@ Every change to the global CLAUDE.md, an agent, or a skill gets an entry here, n
 
 ## 2026-10-07
 
+- **doc-model, impl-plan, milestone, implement, walkthrough, doc-sync** — Sessions loaded rules they never used. `doc-model.md` was 18 KB and was read first on almost every path, but `/implement` and doc-sync need only the half about roles, statuses and who changes them; half of doc-sync's own definition was plan and milestone rules, loaded in projects that have neither.
+  - `doc-model.md` is now the core (roles, layout, status words, who changes what, execution modes — 10.5 KB). The writing rules moved to `doc-authoring.md` (conventions, defaults, header fields, links, content rules, style — 7 KB), which only `/impl-plan`, `/milestone` and their subagents read.
+  - doc-sync's milestone section moved to `impl-plan/reference/doc-sync-plan.md`, read only when the project has a plan. The agent definition drops from 11.5 KB to 7.9 KB.
+  - Rules that restated doc-model in `implement` and `milestone` are pointers now, and sentences that explained history rather than instructed are gone.
+  - **Contradictions fixed:** `/impl-plan` discovery read the ledger index every other file forbids reading; doc-sync was told to create ledger entries although only `/followup` may; doc-sync's inputs said "the WP report's contents" where `/implement` hands it paths; `swarm.md` credited doc-sync with the `☑ landed` marker `/implement` writes; `/milestone`'s single-doc path cited "checks 2–9" of 11; templates and tests still said "Design questions" for the section now called Decisions; a test said doc-sync sets `in progress`.
+
 - **milestone, followup, doc-model, doc-sync, implement, walkthrough, wp-worker** — Drops support for single-file milestone docs and single-file ledgers. Every rule about a section, a marker or a link had a second form for that layout — in 14 files, plus a 5.8 KB template — and all of it loaded in every session although no active project needs it: project A's single-file docs (M0–M12) are all landed and frozen, and its ledger is migrated.
   - `templates/milestone.md` and `followup/reference/legacy-ledger.md` are gone. `fu-migrate.ps1` stays.
   - A landed single-file doc is frozen history: refresh still reads its As-built section, and nothing edits it. An unlanded one, or a ledger kept as one file, stops the skill with a pointer to `/milestone <id>` or `fu-migrate.ps1` — `/followup` repeats the note so it isn't lost.

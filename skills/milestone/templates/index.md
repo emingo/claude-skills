@@ -2,7 +2,7 @@
 
 This directory divides [`<plan>`](../<plan>.md)'s milestones into work packages: design questions, file ownership, frozen contracts, acceptance checklists, and an as-built record filled in after each milestone lands. **The plan remains the single source of truth for *what* correct behavior is** — these docs are about *how the work is sequenced and divided*, and reference the plan by section rather than restating it.
 
-Start here when picking up work: find the first milestone whose `Depends on:` have all landed (or await only a user check) and run `/implement <id>` — it refreshes a doc written ahead of time before starting. To review first, read its Entry criteria, Design questions, and work packages.
+Start here when picking up work: find the first milestone whose `Depends on:` have all landed (or await only a user check) and run `/implement <id>` — it refreshes a doc written ahead of time before starting. To review first, read its Entry criteria, Decisions, and work packages.
 
 ## Documents
 
@@ -52,7 +52,7 @@ Each milestone doc's `Execution:` says how it gets implemented: **guided** (one 
 
 ## Section profile
 
-<!-- The project-specific sections every milestone doc carries between "Test requirements" and "Acceptance criteria" (e.g. "Trace obligations", "Seam changes — Engine.Graphics"), and any renamed default sections. /milestone reads this to keep new docs consistent. If none: "Default sections only." -->
+<!-- The project-specific sections every milestone doc carries before "Acceptance criteria" (e.g. "Trace obligations", "Seam changes — Engine.Graphics"), and any renamed default sections. /milestone reads this to keep new docs consistent. If none: "Default sections only." -->
 
 ## As-built rules
 

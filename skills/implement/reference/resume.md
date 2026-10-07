@@ -1,6 +1,6 @@
 # Resume — derive run state
 
-There is no run-state file. Everything is recoverable from the docs, git and the worktrees, so a run cut off by a session limit, a crash, compaction or `/clear` resumes from a fresh session by re-running `/implement`.
+There is no run-state file: state is derived from the docs, git and the worktrees, so re-running `/implement` in a fresh session resumes an interrupted run.
 
 Check in this order:
 

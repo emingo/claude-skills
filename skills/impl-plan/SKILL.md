@@ -12,7 +12,7 @@ Request: $ARGUMENTS
 
 ## Hard rules
 
-- **Read `${CLAUDE_SKILL_DIR}/reference/doc-model.md` first** — it defines doc roles, convention detection, defaults, status words, header fields, links, content rules and style. Everything below assumes it.
+- **Read `${CLAUDE_SKILL_DIR}/reference/doc-model.md` and `${CLAUDE_SKILL_DIR}/reference/doc-authoring.md` first** — doc roles and status words; convention detection, defaults, header fields, links, content rules and style. Everything below assumes them.
 - **Follow the project's detected conventions**; defaults apply only where the project has none.
 - **Never commit.** Suggest the commit message at the end.
 - **The ledger is written only through `/followup`** (Skill tool), which also creates it on first use. Never hand-write ledger entries or its skeleton.
@@ -24,7 +24,7 @@ Request: $ARGUMENTS
 
 - Project `CLAUDE.md` (especially Documentation Workflow), `README.md`, the `docs/` listing.
 - Any existing plan (`docs/*plan*.md`, `docs/*IMPLEMENTATION*.md`, `docs/*roadmap*.md`), milestone dir + index + `_template.md`, one sample milestone doc's headings.
-- Ledger index — open entries only.
+- Ledger — open entries only: grep the entry folder's front matter (doc-model "Finding entries"), never the generated index.
 - Manifests for the real stack and versions (`*.csproj`, `*.sln`, `package.json`, `pyproject.toml`, `Cargo.toml`, …) and the top-level source layout.
 - `git log --oneline -20`, `git rev-parse --short HEAD`. Not a git repo → recommend `git init` before planning (`Written against` and `/milestone refresh` depend on history); if the user declines, write `Written against: n/a` and refresh falls back to file dates.
 
@@ -32,7 +32,7 @@ If the request above is empty, ask what to build before anything else. If a plan
 
 ## 2. Conventions profile
 
-Resolve conventions per doc-model.md and print the five-line profile before writing anything. On greenfield say "defaults" per line so the user can object early.
+Resolve conventions per doc-authoring.md and print the five-line profile before writing anything. On greenfield say "defaults" per line so the user can object early.
 
 ## 3. Questions
 

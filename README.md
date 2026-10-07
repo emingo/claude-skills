@@ -30,7 +30,7 @@ My user-level Claude Code configuration — global instructions, subagents and s
    - `/milestone mode` switches a milestone between the two.
 4. **Throughout:** `/followup` keeps anything deferred from getting lost — a deferred entry that names a milestone blocks that milestone from landing — and `doc-sync` keeps the plan and milestone docs matching what was actually built.
 
-The rules these share (doc roles, status words, who may change what) are in `skills/impl-plan/reference/doc-model.md`.
+The rules these share (doc roles, status words, who may change what) are in `skills/impl-plan/reference/doc-model.md`; the rules for writing those docs are in `doc-authoring.md` next to it.
 
 ## Trying it
 

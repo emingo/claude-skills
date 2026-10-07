@@ -1,6 +1,6 @@
 # Refresh procedure
 
-A milestone doc written ahead of time captured the project as of its `Written against` sha. Refresh brings it up to date just before implementation, so the work starts from reality rather than from a projection. It is also the approval step: a refreshed doc ends `approved`, ready to implement.
+Brings a doc written ahead of time up to date with everything since its `Written against` sha, just before implementation — and approves it.
 
 ## 1. Collect what the doc hasn't seen
 
