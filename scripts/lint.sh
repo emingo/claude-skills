@@ -16,6 +16,7 @@ for d in skills/*/; do
   [[ -f $s ]] || { fail "$d" "no SKILL.md"; continue; }
   [[ $(front "$s" name) == "$n" ]] || fail "$s" "frontmatter name must match the directory name"
   [[ -n $(front "$s" description) ]] || fail "$s" "no description"
+  desc=$(front "$s" description); [[ ${#desc} -le 500 ]] || fail "$s" "description is ${#desc} chars — keep it to 500 (it loads in every session)"
   [[ $coverage == *"\`$n\`"* ]] || fail tests.md "coverage table has no row for \`$n\`"
 done
 
@@ -23,6 +24,7 @@ for a in agents/*.md; do
   n=${a##*/}; n=${n%.md}; tools=$(front "$a" tools); model=$(front "$a" model)
   [[ $(front "$a" name) == "$n" ]] || fail "$a" "frontmatter name must match the file name"
   [[ -n $(front "$a" description) ]] || fail "$a" "no description"
+  desc=$(front "$a" description); [[ ${#desc} -le 500 ]] || fail "$a" "description is ${#desc} chars — keep it to 500 (it loads in every session)"
   [[ -n $(front "$a" color) ]] || fail "$a" "no color"
   if [[ $n == *reviewer ]]; then
     [[ $tools == "Read, Grep, Glob, Bash" && -z $model ]] || fail "$a" "reviewers have tools: Read, Grep, Glob, Bash (git reads only) and omit model"

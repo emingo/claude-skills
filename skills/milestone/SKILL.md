@@ -1,7 +1,7 @@
 ---
 name: milestone
-description: Write or refresh milestone execution docs from the project's implementation plan — a folder per milestone with an overview (decisions, acceptance checklist, ledger reconciliation), one small file per commit-sized work package with exclusive file ownership, and an append-only as-built record. /milestone all writes the docs for the next milestones that can start (just in time; --full for every one) plus the index; /milestone <id> writes one; /milestone next picks the next unblocked one; /milestone refresh <id> re-validates a doc written ahead of time against current code, landed as-built records and the follow-up ledger, then records reviewer decisions and marks it approved; /milestone mode <guided|swarm> [<id> | from <id> | all] switches how milestones get implemented. Use when the user asks to split a plan into milestones/phases/steps, to switch milestones between guided and agent-swarm implementation, or before starting implementation of a milestone whose doc is still proposed/approved and stale.
-argument-hint: "[all | next | <id> | refresh <id> | mode <guided|swarm> [<id> | from <id> | all]]"
+description: Write or refresh milestone execution docs from the project's implementation plan — a folder per milestone with an overview, one small file per work package and an as-built record — and switch milestones between guided and swarm implementation. Use when the user asks to split a plan into milestones, phases or steps, to switch a milestone to guided or agent-swarm mode, or before implementing a milestone whose doc is still proposed, or approved but stale.
+argument-hint: "[all [--full] | next | <id> | refresh <id> | mode <guided|swarm> [<id> | from <id> | all]]"
 allowed-tools: Bash(git log *) Bash(git show *) Bash(git diff *) Bash(git rev-parse *) Bash(git status *)
 ---
 

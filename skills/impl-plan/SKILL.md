@@ -74,7 +74,7 @@ Follow-up candidates include whatever comes after this plan — work that is vis
 
 ## 7. Wire the project CLAUDE.md
 
-Ask before editing. Add or update its **Documentation Workflow** section (≈2 paragraphs, per the global CLAUDE.md rule), naming:
+Ask before editing. Add or update its **Documentation Workflow** section (≈2 paragraphs; what it must say is in `${CLAUDE_SKILL_DIR}/reference/claude-md-section.md`), naming:
 - the plan path — doc-sync updates only the header status, gate status lines, and resolved `[VERIFY]` tags/register rows;
 - the milestone dir and id pattern — the active milestone folder carries the checklist and an append-only as-built record of what differed; landed docs are frozen; implement with `/implement <id>` (guided or swarm per the doc's `Execution`; switch with `/milestone mode`), which refreshes docs written ahead of time first;
 - the ledger path and the `/followup` rule;

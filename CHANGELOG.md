@@ -4,6 +4,10 @@ Every change to the global CLAUDE.md, an agent, or a skill gets an entry here, n
 
 ## 2026-10-07
 
+- **global, milestone, implement, walkthrough, impl-plan, repo** — Less text loads in every session. Skill and agent descriptions and the global CLAUDE.md are the always-on cost, paid in sessions that never touch a plan.
+  - The `milestone`, `implement` and `walkthrough` descriptions were 840–1,014 characters each, mostly mode syntax that `argument-hint` and the skill body already carry. They now say when to use the skill, in under 500. `scripts/lint.sh` fails on a longer one.
+  - The global CLAUDE.md's "Documentation Workflow section" rule was 2.4 KB — a quarter of the file — and applies only while writing a project CLAUDE.md. Its content moved verbatim to `impl-plan/reference/claude-md-section.md`; the global file keeps a pointer, and `/impl-plan` step 7 reads the same file instead of restating it.
+
 - **milestone, impl-plan, implement, doc-sync, doc-model, global** — The docs now hold only what something reads, and doc-sync runs when it has something to say. An audit of every artifact the skills write found that about half the sections had no reader, the same fact was written in three or four places, and a 5-WP milestone cost about 6 doc-sync launches and 6–10 doc-only commits.
   - **Guided mode: one commit per work package, doc-sync once at landing.** The WP commit now carries the code, the ledger entries and the `☑ landed` marker, with `Review:` and `Deviation:` lines in its body; doc-sync reads those from the commit range when the milestone lands. Before, every WP got its own doc-sync launch and `Sync docs` commit, mostly to write "no deviations".
   - **Swarm:** no doc-sync for `.0` alone, and the landing doc-sync is the last one — the separate "final pass" repeated it.
