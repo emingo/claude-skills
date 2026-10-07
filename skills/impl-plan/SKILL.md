@@ -48,7 +48,7 @@ Use AskUserQuestion with options you inferred from discovery; skip anything the 
 
 ## 4. Draft
 
-Write the plan from `${CLAUDE_SKILL_DIR}/templates/plan.md` (or the project's existing plan structure when extending). Strip every `<!-- guidance -->` comment; never delete a heading (`None — <reason>`). Split the spec into as many numbered sections as the subsystems need and fix every `§` reference after renumbering.
+Write the plan from `${CLAUDE_SKILL_DIR}/templates/plan.md` (or the project's existing plan structure when extending). Strip every `<!-- guidance -->` comment; leave out a section the template marks Optional when it would be empty, and keep every other heading (`None — <reason>`). Split the spec into as many numbered sections as the subsystems need and fix every `§` reference after renumbering.
 
 Gate rules for the Milestones section:
 - `M0` is a runnable, testable skeleton plus the first frozen contracts.
@@ -58,7 +58,7 @@ Gate rules for the Milestones section:
 - Every path in the layout tree names the milestone that introduces it.
 - Every `[VERIFY]` has a register row with an owner.
 
-Header: `Status: draft`, `Execution:` = the round-1 answer, `Written against` = HEAD, one-line `Last updated`.
+Header: `Status: draft`, `Execution:` = the round-1 answer, `Written against` = HEAD.
 
 ## 5. Critique
 
@@ -70,13 +70,13 @@ Launch one `general-purpose` subagent (fresh context, so it doesn't share your b
 
 ## 6. Seed the ledger
 
-If there are follow-up candidates, ask one multiSelect "Record these as follow-ups?" (entries can never be deleted, so confirm first). Invoke `/followup` once per confirmed item, with Origin naming the plan section (`— plan review §N`).
+Follow-up candidates include whatever comes after this plan — work that is visibly out rather than forgotten becomes `Kind: deferred` entries, not a plan section. If there are candidates, ask one multiSelect "Record these as follow-ups?" (entries can never be deleted, so confirm first). Invoke `/followup` once per confirmed item, with Origin naming the plan section (`— plan review §N`).
 
 ## 7. Wire the project CLAUDE.md
 
 Ask before editing. Add or update its **Documentation Workflow** section (≈2 paragraphs, per the global CLAUDE.md rule), naming:
-- the plan path — doc-sync updates only the header status, gate status lines, resolved `[VERIFY]` tags/register rows, and the one-line Last updated;
-- the milestone dir and id pattern — the active milestone doc carries the checklist and append-only As-built record; landed docs are frozen; implement with `/implement <id>` (guided or swarm per the doc's `Execution`; switch with `/milestone mode`), which refreshes docs written ahead of time first;
+- the plan path — doc-sync updates only the header status, gate status lines, and resolved `[VERIFY]` tags/register rows;
+- the milestone dir and id pattern — the active milestone folder carries the checklist and an append-only as-built record of what differed; landed docs are frozen; implement with `/implement <id>` (guided or swarm per the doc's `Execution`; switch with `/milestone mode`), which refreshes docs written ahead of time first;
 - the ledger path and the `/followup` rule;
 - anything doc-sync must not touch (spec docs, templates).
 

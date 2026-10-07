@@ -21,16 +21,16 @@ A project with its own genre is followed, not migrated: e.g. `r<N>` ids with a `
 - Milestones: one folder per milestone, `docs/milestones/M<n>[a|b]-<kebab-slug>/` (layout below); index `docs/milestones/README.md`
 - `M0` = foundation: runnable, testable skeleton plus the first frozen contracts. Add it even if the user's outline starts at M1.
 - Split suffixes: `a`/`b` = either **parallel halves under one shared gate** or a **sequential split with separate gates** — the index must say which.
-- Work packages: `WP` + the milestone id minus its letter prefix + `.n` — M2 → `WP2.1`, M6a → `WP6a.3`, R4 → `WP4.2`. `.0` = apply reviewer decisions, confirm entry criteria, and pre-edit the shared hotspots; the last WP = verification + doc-sync + ledger. Every other WP is implicitly After `.0`, and the last WP is implicitly After all the others.
+- Work packages: `WP` + the milestone id minus its letter prefix + `.n` — M2 → `WP2.1`, M6a → `WP6a.3`, R4 → `WP4.2`. `.0` = apply reviewer decisions, confirm entry criteria, and pre-edit the shared hotspots; every other WP is implicitly After `.0`. There is no verification WP (doc-model, Milestone doc layout).
 - Milestone design questions: `D<n>`, numbered per doc (`### D1. <Title> (Q5, FU-012)`). Never `Q<n>` — that's the plan's register.
 - Plan assumptions: `Q<n>` in the assumption register, project-wide; inline uncertainty: `[VERIFY]`.
 - Ledger: entries `docs/fu/FU-NNN.md`, generated index `docs/follow-ups.md`.
 
 ## Header fields
 
-**Plan:** `**Status:**` · `**Audience:** Claude Code (and humans reviewing its work)` · `**Execution:** guided | swarm` (default for milestone docs not yet written) · `**Companions:**` (spec docs, ledger, milestone index) · `**Written against:** \`<sha>\` (date)` · `**Last updated:** <date> — <one line>`. One line only — history lives in git and the milestone as-built records. Existing plans with a "Previously:" chain or a "Status as of" section keep their style.
+**Plan:** `**Status:**` · `**Execution:** guided | swarm` (default for milestone docs not yet written) · `**Written against:** \`<sha>\` (date)`. Nothing else: history lives in git and the as-built records. An existing plan with more header lines (`Last updated`, a "Previously:" chain, a "Status as of" section) keeps its style.
 
-**Milestone doc** (the overview in the folder layout): `**Status:**` · `**Depends on:**` (id + what it provides) · `**Blocks:**` · `**Can run alongside:**` · `**Execution:** guided | swarm` · `**Work packages:** N` · `**Written against:** \`<sha>\` (date)` · then a line `Spec source: §8 M2, §6.3.`
+**Milestone doc** (the overview): `**Status:**` · `**Depends on:**` (id + what it provides) · `**Blocks:**` · `**Can run alongside:**` · `**Execution:** guided | swarm` · `**Written against:** \`<sha>\` (date)` · then a line `Spec source: §8 M2, §6.3.`
 
 ## Links
 
@@ -40,14 +40,14 @@ A project with its own genre is followed, not migrated: e.g. `r<N>` ids with a `
 
 ## Content rules
 
-- **Silence is deliberate:** never delete a template heading; an empty section says `None — <reason>`. Sole exception: the milestone template's `<Project obligation>` placeholder is replaced by the Section profile's sections, or removed when the profile is "Default sections only".
+- **Omit what's empty:** a section the template marks Optional is left out when it has nothing to say; every other heading stays, and an empty one says `None — <reason>`. The milestone template's `<Project obligation>` placeholder is replaced by the Section profile's sections, or removed when the profile is "Default sections only".
 - **Reference, don't restate:** cite `§N.M`; restating the spec in a milestone doc creates two sources of truth.
 - **Every out-of-scope item cites its owner** (another milestone, a non-goal, a ledger entry) so it isn't re-litigated mid-implementation.
 - **Decisions are Chosen vs Rejected with reasons** — one line each where possible; "do not re-litigate §Decisions" is a rule, not a suggestion. A reversal is a dated, reviewed edit, never a silent rewrite.
 - **Acceptance criteria are observable** by a test or a command. Ticked: `- [x] <criterion> — <TestClass.Method / command → output>`. Unmet: stays `- [ ]` with a **bold reason**. Never tick on faith or on a commit message.
 - **Contracts are frozen at the doc that introduces them.** A consumer needing a different shape records a deviation in its own as-built record and a back-note on the owner's.
 - **File ownership is exclusive** between work packages that can run concurrently. A later milestone extending an earlier one's file marks it `*(M0-owned — extended here)*`, and the owner must be an ancestor in the dependency graph.
-- **Append-only history:** As-built records, plan Last-updated, ledger entry bodies. Later As-built additions and corrections are dated H3s (`### YYYY-MM-DD — <event>`); the stale text stays so the mistake remains visible.
+- **Append-only history:** As-built records and ledger entry bodies. Later As-built additions and corrections are dated H3s (`### YYYY-MM-DD — <event>`); the stale text stays so the mistake remains visible.
 - **Deferred criteria never vanish:** an acceptance criterion that can't pass in its milestone stays `- [ ]` with a **bold reason** citing a `Kind: deferred` ledger entry whose `Revisit when` names the later milestone that now owns it.
 - **Not-implemented exemplars use reserved fake names** (`x-not-a-real-element`), never a real feature that simply isn't built yet — those tests break the day a later WP builds it.
 - **No unapproved dependencies:** a work package may only use packages in the plan's Stack section. A new one needs user approval (what it does / the no-dependency alternative) and a Stack edit first.

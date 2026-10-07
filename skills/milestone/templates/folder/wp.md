@@ -1,8 +1,8 @@
 # WP<n>.<k> — <Title>
 
-**Milestone:** [<ID>](overview.md) · **After:** <WP ids> | — · **Model:** sonnet | opus — <why, when opus> · **Review:** full | light
+**Milestone:** [<ID>](overview.md) · **After:** <WP ids> | — · **Model:** sonnet | opus — <the unsettled design choice, when opus> · **Review:** full | light
 **Files owned:** `path/A.ext`, `path/B.ext` *(<owner>-owned — extended here)*, `tests/.../ATests.ext`
-**Decisions:** <D ids that shape this WP, or —> · **Contracts:** <implements / consumes, by name> · **Ledger:** <open FU ids whose files overlap, or —>
+**Decisions:** <D ids that shape this WP, or —> · **Contracts:** <implements / consumes, by name> · **Ledger:** <open entries whose files overlap, each with its disposition — [FU-012](../../fu/FU-012.md) (resolved here), [FU-020](../../fu/FU-020.md) (must not worsen) — or —>
 
 <!-- Everything a worker needs for this WP and nothing it doesn't: the worker reads this file and the overview, not the other WPs. Budget: 6 KB — a WP that needs more is too big; split it. -->
 

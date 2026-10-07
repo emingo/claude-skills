@@ -4,6 +4,18 @@ Every change to the global CLAUDE.md, an agent, or a skill gets an entry here, n
 
 ## 2026-10-07
 
+- **milestone, impl-plan, implement, doc-sync, doc-model, global** — The docs now hold only what something reads, and doc-sync runs when it has something to say. An audit of every artifact the skills write found that about half the sections had no reader, the same fact was written in three or four places, and a 5-WP milestone cost about 6 doc-sync launches and 6–10 doc-only commits.
+  - **Guided mode: one commit per work package, doc-sync once at landing.** The WP commit now carries the code, the ledger entries and the `☑ landed` marker, with `Review:` and `Deviation:` lines in its body; doc-sync reads those from the commit range when the milestone lands. Before, every WP got its own doc-sync launch and `Sync docs` commit, mostly to write "no deviations".
+  - **Swarm:** no doc-sync for `.0` alone, and the landing doc-sync is the last one — the separate "final pass" repeated it.
+  - **Verification is no longer a work package.** It ran in the coordinator from the overview's acceptance criteria, so its WP file was written and never read. New status `in progress (verification)`; a doc that still has a verification WP keeps working.
+  - **As-built records deviations only.** A WP built as written gets no entry; the landing record keeps the sha and the notes for the next milestone. Review outcomes, test counts, decisions, follow-up ids and acceptance evidence were copies of the report, the overview's `D<n>` bullets, the ledger and the ticked criteria.
+  - **Overview:** drops `Work packages: N`, Spec references (a copy of the Spec source line) and the ledger reconciliation table — a WP's `Ledger:` field now carries each overlapping entry's disposition, which is where its worker looks. Risks is optional.
+  - **Milestone index:** keeps the Documents table, the parallelism matrix and the Section profile. The protocol, execution modes, shared conventions and as-built rules restated doc-model for a reader that never opened the index; the dependency graph was a copy of the plan's.
+  - **Plan:** drops the `Audience`, `Companions` and `Last updated` header lines, §0 "How to use" and "Cross-cutting practices"; "Deferred beyond this plan" becomes `Kind: deferred` ledger entries. The gate links pointed at single-file docs and now point at `overview.md`.
+  - **Worker report:** drops Summary and Files touched (the coordinator runs `git diff --stat` anyway) and leaves out empty sections.
+  - **"Never delete a template heading" is now "omit what's empty":** a section the template marks Optional is left out; required ones still say `None — <reason>`.
+  - Not changed, deliberately: the `Record follow-ups` commit per merged WP stays. Batching it would leave changes staged across merges, which is what broke merges mid-wave on 2026-10-05.
+
 - **doc-model, impl-plan, milestone, implement, walkthrough, doc-sync** — Sessions loaded rules they never used. `doc-model.md` was 18 KB and was read first on almost every path, but `/implement` and doc-sync need only the half about roles, statuses and who changes them; half of doc-sync's own definition was plan and milestone rules, loaded in projects that have neither.
   - `doc-model.md` is now the core (roles, layout, status words, who changes what, execution modes — 10.5 KB). The writing rules moved to `doc-authoring.md` (conventions, defaults, header fields, links, content rules, style — 7 KB), which only `/impl-plan`, `/milestone` and their subagents read.
   - doc-sync's milestone section moved to `impl-plan/reference/doc-sync-plan.md`, read only when the project has a plan. The agent definition drops from 11.5 KB to 7.9 KB.

@@ -5,18 +5,15 @@
 **Blocks:** <ID> (<why>), … | —
 **Can run alongside:** <IDs, with any condition> | —
 **Execution:** <guided | swarm>
-**Work packages:** <N>
 **Written against:** `<sha>` (<YYYY-MM-DD>)
 
 Spec source: [plan](../../<plan>.md) §<gate ref>, §<spec refs>. Work packages: one file each in this folder. As built: [as-built.md](as-built.md).
 
-## Objective & why it matters
+<!-- Budget for this whole file: 12 KB — reference the plan by §, never restate it. A section whose comment says Optional is left out when it would be empty; every other section is required. -->
 
-<!-- What this milestone makes true, and the cost of getting it wrong. One short paragraph. Budget for this whole file: 12 KB — reference the plan by §, never restate it. -->
+## Objective
 
-## Spec references
-
-<!-- Bullets: `§x.y (what it covers here)`. -->
+<!-- What this milestone makes true, and the cost of getting it wrong. Two or three sentences. -->
 
 ## Scope
 
@@ -47,7 +44,7 @@ A question that needs more reasoning gets a `### D1. <Title>` block under the li
 
 ## Work packages
 
-<!-- One row per WP; the WP's own file holds its scope. Status is written by /implement: ☑ landed (<sha>) · ⛔ blocked (FU-NNN — <why>) · ⛔ blocked (stubbed — FU-NNN); empty = open. -->
+<!-- One row per WP; the WP's own file holds its scope. Verification is not a row: once every WP is landed, /implement runs the Acceptance criteria below. Status is written by /implement: ☑ landed · ☑ landed (<merge sha>) in swarm · ⛔ blocked (FU-NNN — <why>) · ⛔ blocked (stubbed — FU-NNN); empty = open. -->
 
 | WP | Title | After | Model | Review | Status |
 |---|---|---|---|---|---|
@@ -68,13 +65,6 @@ A question that needs more reasoning gets a `### D1. <Title>` block under the li
   - [ ] <what the user checks — exact command and what to look for>
 Ticked by doc-sync: `- [x] <criterion> — <TestClass.Method / command → output / user quote>`. -->
 
-## Follow-up ledger reconciliation
+## Risks
 
-<!-- Every open entry whose files or areas overlap (grep the entry folder). Disposition: **Resolved here** (WP) / Re-deferred (reason, new owner) / Must not worsen / Interacts (how). If none: None — no open entries overlap (checked <date>). -->
-
-| FU | Overlap (files / areas) | Disposition |
-|---|---|---|
-
-## Risks / known-hard-parts
-
-<!-- Likely problems and the mitigation; "Skeleton objection:" lines from drafters. -->
+<!-- Optional — drop the heading when there are none. Likely problems and the mitigation; "Skeleton objection:" lines from drafters. -->

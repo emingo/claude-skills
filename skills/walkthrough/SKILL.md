@@ -70,7 +70,7 @@ Arguments: $ARGUMENTS
    - **the log:** the point's status, outcome, rationale, rejected options, follow-ups, queued edits;
    - **the source's decisions section, by source:**
      - *milestone doc*, `proposed` → rewrite the `D<n>` bullet in `overview.md` to its decided form (`<chosen>. Rejected: <alt> — <why>. (<date>, user)`; a point the user wants to revisit also gets a `/followup` linked from it); a new design question gets the next free `D<n>` bullet. `approved` → same, then tell the user it's a substantive change: `/milestone refresh <id>` re-approves (Status returns to `proposed` there, not here). `in progress` / `landed` / `superseded`, or a project that freezes design docs → **log only**, and suggest `/milestone refresh <id>` or a dated As-built note;
-     - *plan* `draft` → write the decision into §Decisions as Chosen vs Rejected and resolve its `[VERIFY]` tag / register row (Answer + Basis) or re-own it. `approved` → the same is a reviewed reversal: add a note to the one-line Last updated and warn which milestone docs it makes stale;
+     - *plan* `draft` → write the decision into §Decisions as Chosen vs Rejected and resolve its `[VERIFY]` tag / register row (Answer + Basis) or re-own it. `approved` → the same is a reviewed reversal: date it in §Decisions, name it in the suggested commit message, and warn which milestone docs it makes stale;
      - *ledger* → a `/followup` Update bullet on the entry ("confirmed / changed in walkthrough `<log>` #N"); status flips stay with doc-sync;
      - *anything else* (a chat response, a review report) → log only;
    - **other implied edits** (review fixes, aligning other docs) are **queued** — later points may change them.

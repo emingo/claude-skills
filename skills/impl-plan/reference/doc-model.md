@@ -8,7 +8,7 @@ Canonical rules shared by `/impl-plan`, `/milestone`, `/implement`, `/walkthroug
 |---|---|---|---|
 | **Plan** | *What* correct looks like and *in what order*: goal, decisions, spec, milestone gates | `/impl-plan` | Living. Gates change only via reviewed edits; status is one line per milestone |
 | **Milestone doc** | *How* one milestone's work is divided: decisions, work packages, checklist, as-built truth — a folder (see Milestone doc layout) | `/milestone` | `proposed` → `approved` → `in progress` → `landed` (then frozen) |
-| **Milestone index** (`<milestones dir>/README.md`) | Documents table, dependency graph, parallelism, protocol, section profile | `/milestone all` | Updated when docs are added/split; no status column |
+| **Milestone index** (`<milestones dir>/README.md`) | Documents table, parallelism matrix, section profile | `/milestone all` | Updated when docs are added/split; no status column |
 | **Ledger** (`docs/fu/FU-NNN.md`, one file per entry) | Deferred items, decisions worth revisiting, compromises, accepted limitations | `/followup` only | Entries never deleted; status lives in each entry's front matter |
 | **Ledger index** (`docs/follow-ups.md`) | One line per entry, for the user | `fu-index.ps1` (generated) | Regenerated whenever an entry changes. **Agents never read it** — they grep `docs/fu/` |
 
@@ -22,13 +22,14 @@ A folder per milestone, so each reader opens only its slice.
 
 | File | Holds | Read by | Budget |
 |---|---|---|---|
-| `overview.md` | Header, objective, scope, what exists, entry criteria, **Decisions** (one bullet per `D<n>`), **Work packages table** (id · title · After · Model · Review · Status), contracts introduced, project sections, acceptance criteria, ledger reconciliation, risks | everyone; workers read it with their WP file | 12 KB |
-| `WP<id>.md` | One work package: After, Model, Review, files owned, the decisions/contracts/ledger ids it touches, scope, tests, definition of done | that WP's worker and reviewer | 6 KB — more means split the WP |
-| `as-built.md` | Append-only: per-WP notes as work lands, then the landing record, then dated corrections | doc-sync; the next milestone's refresh | — |
+| `overview.md` | Header, objective, scope, what exists, entry criteria, **Decisions** (one bullet per `D<n>`), **Work packages table** (id · title · After · Model · Review · Status), contracts introduced, project sections, acceptance criteria, risks | everyone; workers read it with their WP file | 12 KB |
+| `WP<id>.md` | One work package: After, Model, Review, files owned, the decisions/contracts it touches, the open ledger entries overlapping its files (each with a disposition), scope, tests, definition of done | that WP's worker and reviewer | 6 KB — more means split the WP |
+| `as-built.md` | Append-only, and only what differs from the docs: a note per WP that deviated, the landing record, then dated corrections | doc-sync; the next milestone's refresh | — |
 
 - **Decisions have one home:** the `D<n>` bullet in the overview — open (`Proposal / Alternative`) until decided, then `<chosen>. Rejected: <alt> — <why>. (<date>, user)` or `(…, autonomous, FU-NNN)`. An autonomous decision or one the user wants to revisit also gets a `kind: decision` ledger entry, linked from the bullet; nothing restates it in the as-built record.
 - **A refresh is its own commit** (`Refresh <M> milestone doc: <what changed>`) — the doc carries no refresh log.
 - **WP status lives in the overview's table** — the WP file carries none.
+- **Verification is not a work package.** Once every WP is landed, `/implement` runs the overview's Acceptance criteria and doc-sync lands the milestone. A doc written before this rule whose last WP is "verification" → treat that WP as this step and mark its row when the milestone lands.
 - Templates: the `milestone` skill's `templates/folder/`.
 
 **Older single-file docs and ledgers are not supported.** A landed `M<n>-<slug>.md` is frozen history — read its As-built section when a later milestone depends on it, never edit it. An unlanded single-file milestone doc, or a ledger kept as one file → stop and tell the user to rewrite the doc with `/milestone <id>` or migrate the ledger with the `followup` skill's `scripts/fu-migrate.ps1`.
@@ -39,7 +40,7 @@ A folder per milestone, so each reader opens only its slice.
 
 **Plan gate line** (one per milestone, the only status the plan carries): `not written` · `proposed` · `approved (date)` · `in progress` · `landed (date, <sha>)` · `superseded (→ <doc>)`.
 
-**Milestone doc `Status:`** `proposed` · `approved (YYYY-MM-DD)` · `in progress (WPx.n)` (the WP currently being worked; several when they run concurrently: `in progress (WP4a.2, WP4a.5)`) · `in progress (awaiting user check)` (code complete, only interactive criteria left — counts as code-complete for dependents, does not land) · `☑ landed (YYYY-MM-DD, <sha>)` · `superseded (→ <doc>)`. A milestone lands only when every acceptance criterion passes; landing with one outstanding requires an explicit user decision, recorded as a qualifier (`☑ landed (2026-09-10, abc1234) — interactive check waived by user, see As-built`) and in the As-built record.
+**Milestone doc `Status:`** `proposed` · `approved (YYYY-MM-DD)` · `in progress (WPx.n)` (the WP currently being worked; several when they run concurrently: `in progress (WP4a.2, WP4a.5)`) · `in progress (verification)` (every WP landed, acceptance criteria being run) · `in progress (awaiting user check)` (code complete, only interactive criteria left — counts as code-complete for dependents, does not land) · `☑ landed (YYYY-MM-DD, <sha>)` · `superseded (→ <doc>)`. A milestone lands only when every acceptance criterion passes; landing with one outstanding requires an explicit user decision, recorded as a qualifier (`☑ landed (2026-09-10, abc1234) — interactive check waived by user, see As-built`) and in the As-built record.
 
 **Ledger** (an entry's front-matter `status:`): `open` (optionally `open (re-deferred)`, `open (needs user)`, `open (partially resolved — M4)`) → `done (<sha> or PR #N, YYYY-MM-DD)` / `dropped (reason)`.
 
@@ -60,7 +61,7 @@ Every entry carries a `kind:` (format owned by the `followup` skill):
 
 Use commit SHAs (short, backticked) for evidence; PR numbers only when the project uses PRs.
 
-**Work-package markers** (the Status cell of the overview's WP table; written by `/implement`): `☑ landed (<sha>)` — merged and not reverted · `⛔ blocked (FU-NNN — <why>)` — waiting on a user decision or after a second failure; `⛔ blocked (stubbed — FU-NNN)` when a fail-loud stub stands in for it. A WP with neither marker is open. A reverted merge or a `Stub …` commit never makes a WP landed.
+**Work-package markers** (the Status cell of the overview's WP table; written by `/implement`): `☑ landed` (guided: written in the WP's own commit) or `☑ landed (<merge sha>)` (swarm) — committed or merged, and not reverted · `⛔ blocked (FU-NNN — <why>)` — waiting on a user decision or after a second failure; `⛔ blocked (stubbed — FU-NNN)` when a fail-loud stub stands in for it. A WP with neither marker is open. A reverted merge or a `Stub …` commit never makes a WP landed.
 
 **Staleness:** a milestone doc is *stale* when commits since its `Written against` touch code, the plan or the ledger — the doc's own approval and mode-switch commits don't count. Stale `proposed`/`approved` docs get `/milestone refresh` before implementation.
 
@@ -73,8 +74,8 @@ Each transition has exactly one owner; nobody else makes it.
 | Plan `draft` → `approved` | `/impl-plan` hand-off, `/milestone` load, or `/implement` preflight (user confirms) |
 | Gate `not written` → `proposed` | `/milestone`, only for docs it wrote in that run |
 | Doc `proposed` → `approved`, gate → `approved` | `/milestone refresh` (after reviewer decisions; `--autonomous` only when invoked by `/implement` in swarm mode) |
-| Doc → `in progress (WPx.n)`; gate → `in progress`; plan header → `in progress — <ids> active` | `/implement`, when it starts work on the milestone (a 1–3 line edit; it knows the values) |
-| WP markers `☑ landed` / `⛔ blocked` | `/implement`, after the merge or failure it just handled (never for a reverted merge or a `Stub …` commit) |
+| Doc → `in progress (WPx.n)` / `in progress (verification)`; gate → `in progress`; plan header → `in progress — <ids> active` | `/implement`, when it starts work on the milestone (a 1–3 line edit; it knows the values) |
+| WP markers `☑ landed` / `⛔ blocked` | `/implement`, with the commit or after the merge or failure it just handled (never for a reverted merge or a `Stub …` commit) |
 | Doc → `in progress (awaiting user check)` | `doc-sync`, when only interactive criteria remain |
 | Doc → `☑ landed`; gate → `landed (date, <sha>)` | `doc-sync`, only when all criteria pass (else user decision) |
 | Plan header → `implemented` | `doc-sync`, when every gate is landed |
@@ -86,7 +87,7 @@ Each transition has exactly one owner; nobody else makes it.
 
 How a milestone gets implemented — not how its doc is written. **Docs are always swarm-ready**, whatever the mode, so switching never needs a rewrite.
 
-- **guided** — work packages run one at a time in the main session, pausing for the user after each (implement → stack review → commit → doc-sync).
+- **guided** — work packages run one at a time in the main session, pausing for the user after each (implement → stack review → one commit); doc-sync runs once, when the milestone lands.
 - **swarm** — parallel worker agents in git worktrees, as far as `After:` ordering and file ownership allow; a coordinator (the main session) merges each finished WP and runs doc-sync once per merged wave.
 
 What "swarm-ready" requires of every milestone doc:

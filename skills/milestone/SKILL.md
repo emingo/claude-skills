@@ -18,7 +18,7 @@ Arguments: $ARGUMENTS
 - **Never commit.** Suggest the commit message at the end.
 - **Never create the ledger or write entries by hand** — `/followup` only.
 - **Stay within the size budgets** (doc-model, Milestone doc layout): overview ≤ 12 KB, each WP file ≤ 6 KB. Reference the plan by `§`, put a decision's reasoning in one line, and split a WP that won't fit.
-- **Never delete a template heading** (`None — <reason>`); strip every `<!-- guidance -->` comment. Sole exception: the `<Project obligation>` placeholder becomes the Section profile's sections, or is removed when the profile is "Default sections only".
+- **Keep every required template heading** (an empty one says `None — <reason>`) and leave out the ones the template marks Optional when they'd be empty; strip every `<!-- guidance -->` comment. The `<Project obligation>` placeholder becomes the Section profile's sections, or is removed when the profile is "Default sections only".
 - **No work package introduces a dependency outside the plan's Stack.** If one is needed, ask the user (what it does / the no-dependency alternative) before drafting, and edit Stack only on approval.
 - **Skeleton fields are the main agent's alone:** dependencies, work-package file ownership, contracts, acceptance criteria, Section profile. Drafting subagents may object, never change them.
 - **Follow the project's genre** when it has one (its `_template.md`, its section names, a split design-doc/implementation-record model) — map this skill's sections onto theirs.
@@ -55,11 +55,11 @@ Build one table covering every milestone being written before any doc is written
 - id + slug; split proposals (a/b, parallel or sequential) — **ask the user** before splitting, since it changes the gate structure;
 - Depends on / Blocks / Can run alongside;
 - `Execution`: the plan's default (existing docs keep theirs);
-- work packages `WP<n>.0` … `WP<n>.N` (id form per doc-authoring): `.0` apply reviewer decisions, confirm entry criteria, and pre-edit the shared hotspots (package refs, project/solution files, registries); last = verification + doc-sync + ledger; each with **`After:`**, **files owned**, **`Model:`** and **`Review:`** (doc-model's rules) and gating notes — swarm-ready per doc-model's Execution modes, whatever the mode;
+- work packages `WP<n>.0` … `WP<n>.N` (id form per doc-authoring): `.0` apply reviewer decisions, confirm entry criteria, and pre-edit the shared hotspots (package refs, project/solution files, registries); no verification WP — the acceptance criteria are run once every WP is landed; each with **`After:`**, **files owned**, **`Model:`** and **`Review:`** (doc-model's rules) and gating notes — swarm-ready per doc-model's Execution modes, whatever the mode;
 - contracts introduced and consumed;
 - acceptance criteria expanded from the plan gate (build/test gates first; repeat grep-able conventions);
 - which `[VERIFY]` tags / register questions each milestone owns (each becomes a `D<n>` design question);
-- a disposition for every open ledger entry whose `files:` or `areas:` overlap;
+- a disposition for every open ledger entry whose `files:` or `areas:` overlap, in the `Ledger:` field of the WP that owns those files (resolved here / must not worsen / interacts — how); an entry no WP takes is re-deferred through `/followup`, not listed in the doc;
 - the **Section profile**: the index's existing one, or decide it now from the project's architecture (layer-named change sections, cross-cutting obligations such as tracing) — "Default sections only" if nothing warrants one.
 
 Run the consistency checklist (below) against the skeleton and fix it before drafting.
@@ -73,7 +73,7 @@ Template: the project's own if it has one; else `${CLAUDE_SKILL_DIR}/templates/f
 
 ### C. Consistency pass (main agent)
 
-Re-read every doc's header, work packages, contracts, criteria and reconciliation table, and check:
+Re-read every doc's header, work packages (incl. their `Ledger:` fields), contracts and criteria, and check:
 
 1. *(`all` only)* Every plan gate maps to exactly one doc or a declared a/b pair; the index lists the same set.
 2. Depends on ↔ Blocks are symmetric; Can run alongside is symmetric; no cycles; matches the plan's dependency graph.
@@ -81,9 +81,9 @@ Re-read every doc's header, work packages, contracts, criteria and reconciliatio
 4. Every contract is introduced in exactly one doc; every consumer depends (transitively) on the introducer.
 5. Every `§` reference exists in the plan.
 6. Every plan acceptance bullet is covered by the doc's criteria (for a split, by the pair together).
-7. Every open overlapping ledger entry has a disposition; ledger links use the relative path to the resolved ledger and its anchor style.
+7. Every open overlapping ledger entry is in a WP's `Ledger:` field with a disposition, or was re-deferred; ledger links are relative paths to the entry files.
 8. Every `[VERIFY]` / register question has exactly one owning milestone, where it appears as a `D<n>` design question.
-9. WP ids are unique, sequential and in the doc-authoring form; `.0` and the last WP follow the convention; every template heading is present (placeholder exception aside); no guidance comments remain; no WP uses a package outside Stack.
+9. WP ids are unique, sequential and in the doc-authoring form; `.0` follows the convention and no WP is a verification step; every required template heading is present; no guidance comments remain; no WP uses a package outside Stack.
 10. Every WP has `After:`, `Model:` and `Review:`; each `Model: opus` names the unsettled design choice that earns it, and more than a third of a doc's WPs on `opus` is reported with the WPs to reconsider; the `After:` graph is acyclic; manifests, project/solution files and registries are owned by `.0` or explicitly sequenced; every header has `Execution`.
 11. Size budgets hold (`wc -c`): overview ≤ 12 KB, each WP file ≤ 6 KB. Over → cut restated plan text and long rationale first, then split the WP.
 
@@ -91,7 +91,7 @@ Fix what's fixable; report anything that needs the user.
 
 ### D. Index
 
-Write (or update) `<milestones dir>/README.md` from `${CLAUDE_SKILL_DIR}/templates/index.md`, listing only docs that exist: Documents table (no status column), split semantics, mermaid dependency graph, parallelism matrix, multi-agent protocol (always in full — docs are swarm-ready whatever the mode), execution modes, shared conventions, Section profile, as-built rules.
+Write (or update) `<milestones dir>/README.md` from `${CLAUDE_SKILL_DIR}/templates/index.md`, listing only docs that exist: Documents table (no status column), split semantics, parallelism matrix, Section profile. The dependency graph stays in the plan only.
 
 ### E. Plan + report
 

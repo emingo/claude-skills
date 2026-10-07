@@ -1,24 +1,10 @@
 # <Project> — Implementation Plan
 
 **Status:** draft
-**Audience:** Claude Code (and humans reviewing its work)
 **Execution:** guided
-**Companions:** <spec/design docs, if any> · [Milestone index](milestones/README.md) · [Follow-up ledger](follow-ups.md)
 **Written against:** `<sha>` (<YYYY-MM-DD>)
-**Last updated:** <YYYY-MM-DD> — initial draft.
 
----
-
-## 0. How to use this document
-
-<!-- What this doc is and how it relates to the companions. Then the numbered rules, adapted but keeping all four: -->
-
-Rules for working from this doc:
-
-1. **Do not re-litigate §2.** Those decisions were made with the alternatives on the table; reversing one is a dated, reviewed edit to §2, not a mid-implementation judgement call.
-2. **Milestones in §8 are gated.** Do not start a milestone until every predecessor in §8's dependency graph has landed (or is code-complete, awaiting only a user check) and its execution doc is `approved`. A milestone is done when its acceptance criteria pass, not when the happy path demos.
-3. **`[VERIFY]` marks an unconfirmed assumption.** The milestone that owns it (§11) resolves it in place, removes the tag, and records the answer in §11.
-4. **Execution detail lives in `milestones/`.** This doc defines *what* and *in what order*; each milestone doc defines *how* the work is divided and records what actually shipped.
+<!-- A section whose comment says Optional is left out when it would be empty — renumber what follows and fix every § reference. Every other section is required. -->
 
 ---
 
@@ -30,7 +16,7 @@ Rules for working from this doc:
 
 ### Non-goals
 
-<!-- Bullets. Each one a thing a reasonable person might assume is in scope. -->
+<!-- Bullets. Each one a thing a reasonable person might assume is in scope. What comes after this plan is not listed here — it becomes `Kind: deferred` ledger entries. -->
 
 ### Definition of done (whole project)
 
@@ -40,7 +26,7 @@ Rules for working from this doc:
 
 ## 2. Decisions already made
 
-<!-- One ### per decision, Rejected before Chosen when they're alternatives to each other. Each: bulleted reasons, then a one-word verdict line. Record the cost of the chosen path, not just its benefits. -->
+<!-- One ### per decision, Rejected before Chosen when they're alternatives to each other. Each: bulleted reasons, then a one-word verdict line. Record the cost of the chosen path, not just its benefits. Reversing one is a dated, reviewed edit here, never a mid-implementation call. -->
 
 ### 2.1 Rejected: <alternative>
 
@@ -56,6 +42,8 @@ Rejected.
 ---
 
 ## 3. Reference material
+
+<!-- Optional — drop the section when there is nothing to list. -->
 
 | Source | Use for |
 |---|---|
@@ -102,7 +90,7 @@ Rejected.
 
 ## 7. Conventions
 
-<!-- Project-specific, grep-able rules. Anything checkable by grep gets repeated as an acceptance criterion in every milestone doc. -->
+<!-- Project-specific, grep-able rules, plus any every-milestone obligation (build-warnings policy, error-path tests written with the feature). Anything checkable by grep gets repeated as an acceptance criterion in every milestone doc. -->
 
 - Traceability tags (grep targets, not explanatory comments): `// ASSUMPTION(Qn):` on code resting on an assumption-register answer; `FU-NNN` where code knowingly defers a ledger item.
 - Tests for "not implemented / unsupported" paths use reserved fake names (`x-not-a-real-<thing>`), never a real feature that isn't built yet.
@@ -112,11 +100,11 @@ Rejected.
 
 ## 8. Milestones
 
-Each milestone below is a **gate definition**. Its execution doc in [`milestones/`](milestones/README.md) divides the work and records what shipped; this section stays the gate.
+Each milestone below is a **gate definition**: do not start one until every predecessor in the dependency graph has landed (or is code-complete, awaiting only a user check) and its execution doc is `approved`. Its folder in [`milestones/`](milestones/README.md) divides the work and records what differed; this section stays the gate.
 
 ### M0 — Foundation
 
-_Execution doc: [`milestones/M0-foundation.md`](milestones/M0-foundation.md)_ · **Status:** not written
+_Execution doc: [`milestones/M0-foundation/overview.md`](milestones/M0-foundation/overview.md)_ · **Status:** not written
 
 <!-- 1–3 sentences of scope. -->
 
@@ -125,7 +113,7 @@ _Execution doc: [`milestones/M0-foundation.md`](milestones/M0-foundation.md)_ ·
 
 ### M1 — <Title>
 
-_Execution doc: [`milestones/M1-<slug>.md`](milestones/M1-<slug>.md)_ · **Status:** not written
+_Execution doc: [`milestones/M1-<slug>/overview.md`](milestones/M1-<slug>/overview.md)_ · **Status:** not written
 
 **Acceptance:**
 - <…>
@@ -147,22 +135,10 @@ graph LR
 
 ---
 
-## 10. Cross-cutting practices
+## 10. Assumption register
 
-<!-- Every-milestone obligations: docs stay live (doc-sync after every WP in guided mode, once per merged wave in swarm mode), /followup before a WP is done, error-path tests written with the feature, build warnings policy. -->
-
----
-
-## 11. Assumption register
-
-<!-- Every [VERIFY] in this doc has a row. Owner = the milestone that must resolve it. Basis once answered: documented / toolkit / assumed. Pinned by = the test that fails if the answer is wrong. -->
+<!-- Every [VERIFY] in this doc has a row. Owner = the milestone that must resolve it — in place, removing the tag. Basis once answered: documented / toolkit / assumed. Pinned by = the test that fails if the answer is wrong. -->
 
 | Q | Question | Owner | Answer | Basis | Pinned by |
 |---|---|---|---|---|---|
 | Q1 | <question> | M<n> | _open_ | | |
-
----
-
-## 12. Deferred beyond this plan
-
-<!-- One paragraph or bullets: what comes after, so it's visibly out rather than forgotten. -->

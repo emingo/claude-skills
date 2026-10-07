@@ -3,13 +3,7 @@
 **Status:** in progress | done | blocked | partial
 **Branch:** <your branch> · **Base:** `<base sha>`
 
-## Summary
-
-<2–4 sentences: what now exists and works.>
-
-## Files touched
-
-<Each file; flag any outside files owned, with why.>
+<!-- Tests and Reviewer are always filled. Leave out any other section that has nothing to report. -->
 
 ## Tests
 
@@ -21,7 +15,7 @@
 
 ## Deviations
 
-<From the milestone doc: scope, files, contracts (adapted-side only), acceptance criteria. "None" if none.>
+<From the milestone doc: scope, files, contracts (adapted-side only), acceptance criteria.>
 
 ## Decisions
 
@@ -36,12 +30,12 @@
 
 ## Tests outside ownership affected
 
-<Test name — why it would change. "None" if none.>
+<Test name — why it would change.>
 
 ## Coordinator notes
 
-<Anything the coordinator must act on that isn't a follow-up: files outside ownership you needed, contract problems, ordering issues. "None" if none.>
+<Anything the coordinator must act on that isn't a follow-up: files outside ownership you needed (with why), contract problems, ordering issues.>
 
 ## Cross-repo requests
 
-<Changes needed in another repo or a submodule. "None" if none.>
+<Changes needed in another repo or a submodule.>

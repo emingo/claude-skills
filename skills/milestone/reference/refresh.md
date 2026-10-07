@@ -16,15 +16,15 @@ Let `<sha>` = the doc's `Written against` (if missing, use the commit that last 
 
 | Section | Check |
 |---|---|
-| Header | Depends on / Blocks / Can run alongside still match the plan graph and the index. |
+| Header | Depends on / Blocks / Can run alongside still match the plan graph. |
 | What exists | **Rewrite** as a real inventory of the current code — it's a snapshot, not history. Drop the *Projected* marker. |
 | Entry criteria | Each one met? Unmet → say so; that alone may mean "not ready", not "rewrite". |
 | Decisions (`D<n>`) | Already answered by a landed as-built or a register answer? Mark `Answered by <ref>` and fold it into the Proposal. Obsolete? Say why. New questions surfaced by deviations or ledger entries? Add them with the next free `D<n>`. |
 | Work packages | Files still exist / were renamed / were created by someone else? Scope still needed? `Model:` / `Review:` still right? Then run the **Swarm-readiness check** below. Every WP file is still within 6 KB and the overview within 12 KB. |
 | Contracts | Consumed contracts match the real signatures in code, not the owner doc's planned shape. Introduced contracts don't collide with anything that landed. |
-| Test requirements / Acceptance | Named tests and commands still valid; criteria still cover the gate. |
-| Ledger reconciliation | Rebuild the table by grepping the ledger's open entries for the doc's owned files and areas (doc-model "Finding entries"). |
-| Risks | Add risks the deviations revealed; drop ones that are gone. |
+| Acceptance | Named tests and commands still valid; criteria still cover the gate. |
+| Ledger | Re-grep the ledger's open entries for the doc's owned files and areas (doc-model "Finding entries") and bring each WP's `Ledger:` field up to date: new overlaps get a disposition, resolved entries drop out. |
+| Risks | Add risks the deviations revealed; drop ones that are gone (and the heading with the last one). |
 
 ## Swarm-readiness check
 
@@ -62,7 +62,7 @@ On the user's go-ahead, regenerate the doc from the template (skeleton rules sti
 
 1. Each design question without a decision becomes one AskUserQuestion option set: the Proposal (marked Recommended) vs the Alternative (plus "Other"). Batch up to four per round. With **more than four** undecided questions, run them as `/walkthrough <doc>#<its decisions section>` instead — it records into this same decisions format — then continue at step 3 in the same turn. Before step 4, list any `D<n>` the walkthrough left deferred or open and ask: take the Proposal now (recorded with a `Kind: decision` follow-up), or keep the doc `proposed`. Include the walkthrough log and any ledger entries in the approval commit.
 2. Record the answers: rewrite each `D<n>` bullet in the overview to its decided form — `<chosen>. Rejected: <alternative> — <why>. (<date>, user)` — and nothing else; a decision the user wants to revisit also gets a `/followup` (`kind: decision`) linked from the bullet. The WP text must be unambiguous afterwards.
-3. If a decision implies a plan edit (a §Decision, register answer, or gate), show the exact edit; apply only if the user agrees, and note it on the plan's Last-updated line.
+3. If a decision implies a plan edit (a §Decision, register answer, or gate), show the exact edit; apply only if the user agrees, and name it in the approval commit message.
 4. Set `Status: approved (YYYY-MM-DD)` in the doc and the gate's status line in the plan. New dependencies implied by a decision follow the Stack rule (ask, then edit Stack).
 
 A doc whose `Written against` is HEAD and whose questions are all decided skips straight to step 4 — so `refresh` also serves as "prepare to implement".
