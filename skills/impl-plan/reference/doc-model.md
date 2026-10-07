@@ -7,7 +7,7 @@ Canonical rules shared by `/impl-plan`, `/milestone`, `/implement`, the `doc-syn
 | Doc | Says | Written by | Lifecycle |
 |---|---|---|---|
 | **Plan** | *What* correct looks like and *in what order*: goal, decisions, spec, milestone gates | `/impl-plan` | Living. Gates change only via reviewed edits; status is one line per milestone |
-| **Milestone doc** | *How* one milestone's work is divided: decisions, work packages, checklist, as-built truth — a folder (default) or one file (see Milestone doc layouts) | `/milestone` | `proposed` → `approved` → `in progress` → `landed` (then frozen) |
+| **Milestone doc** | *How* one milestone's work is divided: decisions, work packages, checklist, as-built truth — a folder (see Milestone doc layout) | `/milestone` | `proposed` → `approved` → `in progress` → `landed` (then frozen) |
 | **Milestone index** (`<milestones dir>/README.md`) | Documents table, dependency graph, parallelism, protocol, section profile | `/milestone all` | Updated when docs are added/split; no status column |
 | **Ledger** (`docs/fu/FU-NNN.md`, one file per entry) | Deferred items, decisions worth revisiting, compromises, accepted limitations | `/followup` only | Entries never deleted; status lives in each entry's front matter |
 | **Ledger index** (`docs/follow-ups.md`) | One line per entry, for the user | `fu-index.ps1` (generated) | Regenerated whenever an entry changes. **Agents never read it** — they grep `docs/fu/` |
@@ -20,10 +20,10 @@ A project's existing conventions always beat these defaults. Resolve in this ord
 
 1. The project CLAUDE.md's Documentation Workflow section (declared paths, id pattern, ledger path, no-touch list).
 2. The milestone index's **Section profile**.
-3. Existing files (a project whose docs are single files keeps that layout unless its CLAUDE.md declares the folder layout, e.g. "folder layout from M13"): plan name (`docs/*plan*.md`, `docs/*IMPLEMENTATION*.md`, `docs/*roadmap*.md`), milestone dir and filenames, a `_template.md` in it, one sample milestone doc's headings, the ledger's layout (a `docs/fu/` entry folder, or a legacy single-file ledger and its heading style).
+3. Existing files: plan name (`docs/*plan*.md`, `docs/*IMPLEMENTATION*.md`, `docs/*roadmap*.md`), milestone dir and filenames, a `_template.md` in it, one sample milestone doc's headings, the ledger's entry folder (`docs/fu/`).
 4. Defaults below.
 
-Detect and report as a **conventions profile** (five lines): plan path + header style · milestone dir + id pattern + filename pattern · template/genre (merged default, project `_template.md`, or split design-doc + implementation-record) · layer-specific section names · ledger layout + paths (entry folder and generated index, or legacy single file + heading/anchor style).
+Detect and report as a **conventions profile** (five lines): plan path + header style · milestone dir + id pattern + filename pattern · template/genre (merged default, project `_template.md`, or split design-doc + implementation-record) · layer-specific section names · ledger paths (entry folder and generated index).
 
 A project with its own genre is followed, not migrated: e.g. `r<N>` ids with a `_template.md` and layer-named sections (`## Seam changes — <Project>`), or `mN-<topic>.md` design docs frozen as specs plus `mN-implementation.md` records with checkboxes ticked in the plan. Map the default section list onto theirs rather than adding headings they don't use.
 
@@ -38,9 +38,9 @@ A project with its own genre is followed, not migrated: e.g. `r<N>` ids with a `
 - Plan assumptions: `Q<n>` in the assumption register, project-wide; inline uncertainty: `[VERIFY]`.
 - Ledger: entries `docs/fu/FU-NNN.md`, generated index `docs/follow-ups.md`.
 
-## Milestone doc layouts
+## Milestone doc layout
 
-**Folder (default for new docs).** Each reader opens only its slice — in single-file docs every worker, reviewer and doc-sync run read the whole doc, often larger than the code it described.
+A folder per milestone, so each reader opens only its slice.
 
 | File | Holds | Read by | Budget |
 |---|---|---|---|
@@ -48,14 +48,12 @@ A project with its own genre is followed, not migrated: e.g. `r<N>` ids with a `
 | `WP<id>.md` | One work package: After, Model, Review, files owned, the decisions/contracts/ledger ids it touches, scope, tests, definition of done | that WP's worker and reviewer | 6 KB — more means split the WP |
 | `as-built.md` | Append-only: per-WP notes as work lands, then the landing record, then dated corrections | doc-sync; the next milestone's refresh | — |
 
-- **Decisions have one home:** the `D<n>` bullet in the overview — open (`Proposal / Alternative`) until decided, then `<chosen>. Rejected: <alt> — <why>. (<date>, user)` or `(…, autonomous, FU-NNN)`. No Reviewer decisions section: an autonomous decision or one the user wants to revisit also gets a `kind: decision` ledger entry, linked from the bullet; nothing restates it in the as-built record.
-- **No Refresh log:** a refresh is its own commit (`Refresh <M> milestone doc: <what changed>`), so history lives in git.
+- **Decisions have one home:** the `D<n>` bullet in the overview — open (`Proposal / Alternative`) until decided, then `<chosen>. Rejected: <alt> — <why>. (<date>, user)` or `(…, autonomous, FU-NNN)`. An autonomous decision or one the user wants to revisit also gets a `kind: decision` ledger entry, linked from the bullet; nothing restates it in the as-built record.
+- **A refresh is its own commit** (`Refresh <M> milestone doc: <what changed>`) — the doc carries no refresh log.
 - **WP status lives in the overview's table** — the WP file carries none.
 - Templates: the `milestone` skill's `templates/folder/`.
 
-**Single file (legacy, or a project that declares it).** Everything in one `M<n>-<slug>.md` with the sections of the `milestone` skill's `templates/milestone.md`, including Reviewer decisions and Refresh log; WP markers sit under each WP heading. Landed single-file docs stay as they are — a project can switch to folders for new milestones only.
-
-Rules below that name a section apply to whichever file holds it.
+**Older single-file docs and ledgers are not supported.** A landed `M<n>-<slug>.md` is frozen history — read its As-built section when a later milestone depends on it, never edit it. An unlanded single-file milestone doc, or a ledger kept as one file → stop and tell the user to rewrite the doc with `/milestone <id>` or migrate the ledger with the `followup` skill's `scripts/fu-migrate.ps1`.
 
 ## Status words
 
@@ -80,11 +78,11 @@ Every entry carries a `kind:` (format owned by the `followup` skill):
 | `compromise` | An accepted cost to keep scope | **Why accepted:** in the body |
 | `limitation` | A known gap or constraint (incl. "outside this WP's ownership", "needs another repo") | **Why accepted:** in the body |
 
-**A bare milestone id in `revisit:` blocks that milestone from landing** until the entry is resolved or explicitly re-deferred — this is what stops a deferred criterion from being silently dropped. **Re-deferring** never rewrites the body: append `- **Update (YYYY-MM-DD, <source>):** Revisit when → <new> — <why>`, set `revisit:` to the new value and `status:` to `open (re-deferred)`. (In a legacy single-file ledger the effective Revisit when is the latest such Update, else the field.)
+**A bare milestone id in `revisit:` blocks that milestone from landing** until the entry is resolved or explicitly re-deferred — this is what stops a deferred criterion from being silently dropped. **Re-deferring** never rewrites the body: append `- **Update (YYYY-MM-DD, <source>):** Revisit when → <new> — <why>`, set `revisit:` to the new value and `status:` to `open (re-deferred)`.
 
 Use commit SHAs (short, backticked) for evidence; PR numbers only when the project uses PRs.
 
-**Work-package markers** (folder layout: the Status cell of the overview's WP table; single file: inline under the WP heading as `**Status: ☑ landed** (<sha>)`; written by `/implement`): `☑ landed (<sha>)` — merged and not reverted · `**Status: ⛔ blocked** (FU-NNN — <why>)` — waiting on a user decision or after a second failure; `⛔ blocked (stubbed — FU-NNN)` when a fail-loud stub stands in for it. A WP with neither marker is open. A reverted merge or a `Stub …` commit never makes a WP landed.
+**Work-package markers** (the Status cell of the overview's WP table; written by `/implement`): `☑ landed (<sha>)` — merged and not reverted · `⛔ blocked (FU-NNN — <why>)` — waiting on a user decision or after a second failure; `⛔ blocked (stubbed — FU-NNN)` when a fail-loud stub stands in for it. A WP with neither marker is open. A reverted merge or a `Stub …` commit never makes a WP landed.
 
 **Staleness:** a milestone doc is *stale* when commits since its `Written against` touch code, the plan or the ledger — the doc's own approval and mode-switch commits don't count. Stale `proposed`/`approved` docs get `/milestone refresh` before implementation.
 
@@ -135,8 +133,8 @@ Every WP also declares **`Model:`** — `sonnet` (default) or `opus`, only when 
 
 ## Links
 
-- Relative paths only. Plan → milestone: `milestones/M2-<slug>/overview.md` (single file: `milestones/M2-<slug>.md`). Milestone → plan: `../../<plan>.md#<anchor>` from a milestone folder (`../<plan>.md` from a single file) or just `§N.M` in prose.
-- Milestone → ledger: the relative path to the entry file — `../fu/FU-012.md` from `docs/milestones/<doc>.md`, `../../fu/FU-012.md` from a milestone folder. Ledger ids in tables are links too: `| [FU-012](../fu/FU-012.md) | … |`. Legacy single-file ledgers: `../follow-ups.md#fu-nnn` (explicit anchors) or GitHub's slug of the full heading — never `./follow-ups.md` from inside `docs/milestones/`. Links of that form keep working after migration (the generated index keeps the anchors).
+- Relative paths only. Plan → milestone: `milestones/M2-<slug>/overview.md`. Milestone → plan: `../../<plan>.md#<anchor>` or just `§N.M` in prose.
+- Milestone → ledger: the relative path to the entry file — `../../fu/FU-012.md` from a milestone folder — never the generated index. Ledger ids in tables are links too: `| [FU-012](../../fu/FU-012.md) | … |`.
 - Milestone → milestone: by id in prose (`M0's IPolicyHandler`, `WP6a.3 owns the table`), file link on first mention.
 
 ## Content rules
@@ -148,7 +146,7 @@ Every WP also declares **`Model:`** — `sonnet` (default) or `opus`, only when 
 - **Acceptance criteria are observable** by a test or a command. Ticked: `- [x] <criterion> — <TestClass.Method / command → output>`. Unmet: stays `- [ ]` with a **bold reason**. Never tick on faith or on a commit message.
 - **Contracts are frozen at the doc that introduces them.** A consumer needing a different shape records a deviation in its own as-built record and a back-note on the owner's.
 - **File ownership is exclusive** between work packages that can run concurrently. A later milestone extending an earlier one's file marks it `*(M0-owned — extended here)*`, and the owner must be an ancestor in the dependency graph.
-- **Append-only history:** As-built records, Refresh logs (single-file docs), plan Last-updated, ledger entry bodies. Later As-built additions and corrections are dated H3s (`### YYYY-MM-DD — <event>`); the stale text stays so the mistake remains visible.
+- **Append-only history:** As-built records, plan Last-updated, ledger entry bodies. Later As-built additions and corrections are dated H3s (`### YYYY-MM-DD — <event>`); the stale text stays so the mistake remains visible.
 - **Deferred criteria never vanish:** an acceptance criterion that can't pass in its milestone stays `- [ ]` with a **bold reason** citing a `Kind: deferred` ledger entry whose `Revisit when` names the later milestone that now owns it.
 - **Not-implemented exemplars use reserved fake names** (`x-not-a-real-element`), never a real feature that simply isn't built yet — those tests break the day a later WP builds it.
 - **No unapproved dependencies:** a work package may only use packages in the plan's Stack section. A new one needs user approval (what it does / the no-dependency alternative) and a Stack edit first.

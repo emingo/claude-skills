@@ -13,7 +13,7 @@ Arguments: $ARGUMENTS
 
 - **Read `${CLAUDE_SKILL_DIR}/../impl-plan/reference/doc-model.md` first** — doc roles, convention detection, ids, status words and who changes them, header fields, links, content rules, style. Everything below assumes it.
 - **Never edit a landed doc** (`☑ landed`). Point the user at a dated As-built correction or a new milestone instead.
-- **Never touch an `in progress` doc** except on an explicit `refresh <id>` from the user — and then never change its Status — or via `mode`, which changes only its `Execution` field (for the remaining WPs) and, in a single-file doc, its Refresh log.
+- **Never touch an `in progress` doc** except on an explicit `refresh <id>` from the user — and then never change its Status — or via `mode`, which changes only its `Execution` field (for the remaining WPs).
 - **Never overwrite an existing doc wholesale** — that's what `refresh` is for.
 - **Never commit.** Suggest the commit message at the end.
 - **Never create the ledger or write entries by hand** — `/followup` only.
@@ -66,7 +66,7 @@ Run the consistency checklist (below) against the skeleton and fix it before dra
 
 ### B. Draft
 
-Template: the project's own if it has one; else, for the folder layout, `${CLAUDE_SKILL_DIR}/templates/folder/overview.md`, one `${CLAUDE_SKILL_DIR}/templates/folder/wp.md` per work package (`WP<id>.md`) and `${CLAUDE_SKILL_DIR}/templates/folder/as-built.md`; for a single-file project, `${CLAUDE_SKILL_DIR}/templates/milestone.md`. Status `proposed`; `Written against` = HEAD. A milestone whose dependencies haven't landed gets a *Projected* "What exists".
+Template: the project's own if it has one; else `${CLAUDE_SKILL_DIR}/templates/folder/overview.md`, one `${CLAUDE_SKILL_DIR}/templates/folder/wp.md` per work package (`WP<id>.md`) and `${CLAUDE_SKILL_DIR}/templates/folder/as-built.md`. Status `proposed`; `Written against` = HEAD. A milestone whose dependencies haven't landed gets a *Projected* "What exists".
 
 - **Fewer than 4 docs to write:** draft inline.
 - **4 or more:** launch `general-purpose` subagents in parallel, ~5 docs each, with `${CLAUDE_SKILL_DIR}/templates/drafter-brief.md` filled in — the full skeleton table and Section profile go into every brief. Subagents can't ask the user; open points come back as Proposals or `[VERIFY]` tags. Resolve each skeleton objection: change the skeleton and patch the affected docs, or record why not under that doc's Risks.
@@ -105,7 +105,7 @@ Targets: `<id>` (one milestone; a split parent means both halves) · `from <id>`
 
 1. Resolve the targets; list landed ones as skipped. With `from`/`all`, targets without a doc just inherit the new plan default. A single `<id>` without a doc → refuse and suggest `/milestone <id>` first, or `mode … from <id>`.
 2. **Switching to `swarm`:** run the Swarm-readiness check from `${CLAUDE_SKILL_DIR}/reference/refresh.md` on each target — open `D<n>` questions are reported as a note here, not a failure (`/implement` asks them up front). A target that fails is **not** switched — report its failures with the fix (add an `After:` edge, move a file to `.0`, split a WP) and suggest `/milestone refresh <id>` to apply them. Switching to `guided` needs no check.
-3. For each target that passes: set `**Execution:**`. A single-file doc also gets a Refresh log entry `### Mode → <mode> YYYY-MM-DD`; in the folder layout the commit message carries it. For an `in progress` doc say which WPs it applies to (`(WP3.4–3.6)`); landed WPs are unaffected.
+3. For each target that passes: set `**Execution:**` — the commit message records the switch. For an `in progress` doc say which WPs it applies to (`(WP3.4–3.6)`); landed WPs are unaffected.
 4. `from` / `all`: set the plan header's `**Execution:**` too.
 5. Never change Status or `Written against`; touch nothing else.
 6. Report the switched / skipped / blocked targets and suggest the commit message `Switch <targets> to <mode> execution`.

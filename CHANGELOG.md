@@ -4,6 +4,11 @@ Every change to the global CLAUDE.md, an agent, or a skill gets an entry here, n
 
 ## 2026-10-07
 
+- **milestone, followup, doc-model, doc-sync, implement, walkthrough, wp-worker** — Drops support for single-file milestone docs and single-file ledgers. Every rule about a section, a marker or a link had a second form for that layout — in 14 files, plus a 5.8 KB template — and all of it loaded in every session although no active project needs it: project A's single-file docs (M0–M12) are all landed and frozen, and its ledger is migrated.
+  - `templates/milestone.md` and `followup/reference/legacy-ledger.md` are gone. `fu-migrate.ps1` stays.
+  - A landed single-file doc is frozen history: refresh still reads its As-built section, and nothing edits it. An unlanded one, or a ledger kept as one file, stops the skill with a pointer to `/milestone <id>` or `fu-migrate.ps1` — `/followup` repeats the note so it isn't lost.
+  - doc-sync's default glob for milestone docs matched only the single-file shape (`docs/milestones/*.md`); it is now `docs/milestones/*/overview.md`.
+
 - **implement, wp-worker, milestone, doc-model** — A swarm run should be mostly Sonnet, and it wasn't. In project A's 2026-10-06 run, Opus was about $31 of $39.5 across six logged sessions, although workers already defaulted to Sonnet.
   - **The coordinator ran on Opus:** `implement-loop.ps1` had a `-Model` parameter that nothing passed, so every headless session took the CLI default. The script now defaults to Sonnet, `/implement --model <m>` overrides it, and the log's `START`/`RUN` lines name the model. The design round stays in the user's interactive session, so the decisions that need judgment are made before the loop starts.
   - **Reviewers inherited:** they have no `model`, so each review ran on whatever launched it. Every launch site now sets it from the WP's `Review:` depth — `full` → Opus, `light` → Sonnet. The agents' frontmatter is unchanged.

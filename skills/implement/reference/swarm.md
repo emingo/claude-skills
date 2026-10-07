@@ -9,7 +9,7 @@ A work package is **eligible** when all hold:
 - every milestone it depends on is landed or awaiting a user check;
 - every WP in its `After:` list is **landed** (doc-model: merged, not reverted, marked `☑ landed` by doc-sync) — and every non-`.0` WP is implicitly After `WP<n>.0`;
 - none of its files owned are owned by a running WP;
-- it carries no `⛔ blocked` marker (the overview's WP table, or `**Status: ⛔ blocked**` under a single-file WP heading).
+- it carries no `⛔ blocked` marker in the overview's WP table.
 
 **`.0` runs first and alone, as a worker, for each milestone entering the pool** — it applies reviewer decisions and pre-edits the shared hotspots (package references from Stack, project/solution entries, registries, DI wiring) so parallel workers never touch them. Merge it (§3) and sync before the pool starts.
 

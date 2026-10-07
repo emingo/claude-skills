@@ -5,7 +5,7 @@ There is no run-state file. Everything is recoverable from the docs, git and the
 Check in this order:
 
 0. **A running loop** (interactive sessions only — a session started with `--unattended` was launched by that loop and skips this step). `.implement/loop/loop.lock` naming a live process → an unattended loop is coordinating: report it (and the last lines of `.implement/loop/loop.log`) and stop — never start a second coordinator.
-1. **Docs.** Each milestone's Status; each WP's marker — the Status cell of the overview's WP table (single-file docs: `**Status: ☑ landed** (<sha>)` under the WP heading) — `☑ landed` or `⛔ blocked`. Blocked WPs stay blocked until the user resolves the cause.
+1. **Docs.** Each milestone's Status; each WP's marker — the Status cell of the overview's WP table — `☑ landed` or `⛔ blocked`. Blocked WPs stay blocked until the user resolves the cause.
 2. **The current branch**, in this order:
    1. **A merge in progress** (`git rev-parse -q --verify MERGE_HEAD` succeeds) → `git merge --abort`; treat that WP as a task failure (swarm.md §5).
    2. **A `.implement/reports/<WP>.md` file on the branch** → the merge happened but its processing didn't finish: run merge protocol steps 3–7 for it (build + test first). Before step 5, grep the ledger for entries whose `origin:` already names this WP — those follow-ups were recorded; don't create them twice.

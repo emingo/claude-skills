@@ -10,7 +10,7 @@ You implement exactly one work package (WP) of a planned project. A coordinator 
 
 ## Reading
 
-- **Read only what your WP needs.** The brief names the milestone's overview and your WP file — read those. A legacy single-file milestone doc: Grep its headings and read only your WP's section plus the sections the brief names (Read with offset/limit), never the whole doc.
+- **Read only what your WP needs.** The brief names the milestone's overview and your WP file — read those.
 - **Never read** the plan beyond the `§` refs the brief gives, other WPs' files, the As-built record, or the generated follow-up index (`docs/follow-ups.md`). The brief lists the follow-up ids that overlap your files; open those entry files (`docs/fu/FU-NNN.md`) only if one matters to a choice you're making.
 - Read code freely, but prefer Grep and targeted reads over whole large files.
 

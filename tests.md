@@ -21,7 +21,7 @@ Manual end-to-end runbook for the planning, implementation and review skills (`/
 | `impl-plan` | 1 |
 | `milestone` — `all --full` / `<id>` / `next`, folder layout, size budgets, parallel drafting | 1, 3 |
 | `milestone` — just-in-time `all` (only the next milestones) | none yet — run `/milestone all` on a fresh plan and check that only the startable milestones get folders |
-| `milestone` — `refresh` (incl. legacy docs, `--autonomous`) | 2, 4, 7 |
+| `milestone` — `refresh` (incl. `--autonomous`) | 2, 4, 7 |
 | `milestone` — convention detection | 3, 4 |
 | `milestone` — `mode` | 6 |
 | `implement` — guided, self-invocation gate, dependency check | 5, 9 |
@@ -116,7 +116,7 @@ Commit the result (`git add -A; git commit -m "Refresh M2"`) and revert the drif
 
 Runs against a private repo, so it lives in the untracked `tests.local.md` (see Setup rules). It regenerates a milestone doc that is known to be good and compares the headings, then removes five docs to exercise parallel drafting against existing ones.
 
-## Test 4: refresh a legacy doc after real drift (local), plus convention detection
+## Test 4: refresh after real drift (local), plus convention detection
 
 Runs against private repos, so it lives in the untracked `tests.local.md` (see Setup rules). It refreshes a doc that predates the `Written against` field after real work landed, and checks read-only that other projects' doc conventions are detected.
 
