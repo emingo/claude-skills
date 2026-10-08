@@ -23,7 +23,7 @@ Arguments: $ARGUMENTS
 10. **Deferred criteria become ledger entries:** a criterion moved to a later milestone → `/followup` with `Kind: deferred`, `Revisit when: <that later milestone>`.
 11. **Branch hygiene without losing work:** remove the worktree and delete the branch (`git branch -d`) of every WP that merged or never produced anything (`git worktree unlock` first if a dead process left it locked). A blocked or abandoned WP's branch holds unmerged work — **keep it** and list it in the run report.
 12. **State lives in docs, git and worktrees — never only in context.** Re-running `/implement` resumes (`${CLAUDE_SKILL_DIR}/reference/resume.md`).
-13. **Keep this session's context small.** Workers implement every swarm WP, `.0` included. Builds, tests and scripts write to a log file and you print only the summary lines; never dump process listings, whole logs or whole docs. Read docs by section (Grep the headings, Read with offset/limit). Hand doc-sync and workers paths, shas and ids — not pasted content.
+13. **Keep this session's context small, and keep it for judgment.** In swarm mode this session decides — eligibility, merges, conflicts, integration fixes, autonomous refreshes, follow-ups — and delegates everything that is only execution: workers implement every WP, `.0` included, and a verification runner executes the acceptance commands (swarm.md §1). Builds, tests and scripts write to a log file and you print only the summary lines; never dump process listings, whole logs or whole docs. Read docs by section (Grep the headings, Read with offset/limit). Hand doc-sync and workers paths, shas and ids — not pasted content.
 14. **Slow commands run guarded.** No baseline run of slow end-to-end checks (packaging/consumer smoke, full screenshot runs) — the preflight baseline is the build and unit tests; slow checks run in the milestone's verification. Run a script as `pwsh -NoProfile -File <script> *> <log>` (or the shell's equivalent) in the background with a timeout of about 3× its usual duration and watch it with Monitor; on a timeout, stop its process tree, retry once, then report.
 15. **Design and implementation never share a session.** After the `Approve …` commit, swarm milestones run through the unattended loop (below); `--step` runs and guided milestones end the turn with "approved — `/clear`, then `/implement` to start" — resume picks it up. Every milestone gets a fresh coordinator session; a milestone written and approved mid-run (just in time) starts in the next one.
 
@@ -38,7 +38,7 @@ Arguments: $ARGUMENTS
 | `<id>..<id>` | Inclusive range in plan order. Every dependency outside the range must be landed or awaiting a user check — else list them and stop. |
 | `all` | Every milestone not landed. |
 | `--agents N` | Swarm concurrency cap (default **4**). |
-| `--model <m>` | The unattended coordinator's model (default **sonnet**) — passed to the loop as `-Model`. Workers and reviewers get theirs per WP. |
+| `--model <m>` | The unattended coordinator's model (default **opus**) — passed to the loop as `-Model`. Workers and reviewers get theirs per WP. |
 | `--step` | Swarm without the loop: run one milestone in this session, then stop with "<M> done — `/clear`, then `/implement` to continue". |
 | `--unattended` | Passed only by the loop script — see Unattended. |
 
@@ -58,13 +58,13 @@ Arguments: $ARGUMENTS
    - Refresh recommends a rewrite → halt that milestone and its dependents; continue the rest of the graph.
 8. **Swarm readiness** for swarm milestones: the Swarm-readiness check in the `milestone` skill's `reference/refresh.md`, with undecided `D<n>` counted as failures here. Failure → offer guided mode for that milestone, or stop.
 9. **Forbidden paths:** `git submodule status` + `.gitmodules` paths, plus anything the project CLAUDE.md marks hands-off. They go into every brief.
-10. **Run plan:** milestones · mode each · how it runs (swarm: the unattended loop by default, or `--step`; guided: in a fresh session after this one) · the stack reviewer (rule 6 — say so when it is the fallback) · models: the coordinator's (swarm loop: Sonnet unless `--model`), each WP's worker (Sonnet unless the WP says `opus`) and reviewer (`full` → Opus, `light` → Sonnet) · first wave (swarm) or first WP (guided) · cap N · expected agent count (nested reviewer agents roughly double concurrent load). Ask "Start?" once (self-invoked runs already asked in rule 3).
+10. **Run plan:** milestones · mode each · how it runs (swarm: the unattended loop by default, or `--step`; guided: in a fresh session after this one) · the stack reviewer (rule 6 — say so when it is the fallback) · models: the coordinator's (swarm loop: Opus unless `--model`), each WP's worker (Haiku unless the WP says `opus`) and reviewer (`full` → Opus, `light` → Sonnet) · first wave (swarm) or first WP (guided) · cap N · expected agent count (nested reviewer agents roughly double concurrent load). Ask "Start?" once (self-invoked runs already asked in rule 3).
 
 ## Unattended (the default for swarm)
 
 **From the interactive session**, after preflight and the design round's `Approve …` commit:
 
-1. Start the loop **detached**, so it outlives this session and no background-task time cap kills it mid-milestone: on Windows `Start-Process pwsh -WindowStyle Minimized -ArgumentList '-NoProfile','-File','${CLAUDE_SKILL_DIR}/scripts/implement-loop.ps1','-Scope','<the scope typed>'` (plus `'-Model','<m>'` when `--model` was given; the script defaults to Sonnet); elsewhere `nohup pwsh -NoProfile -File … >/dev/null 2>&1 &`. Tell the user how to stop it (`… implement-loop.ps1 -Stop` ends it after the current milestone) and that closing this session doesn't.
+1. Start the loop **detached**, so it outlives this session and no background-task time cap kills it mid-milestone: on Windows `Start-Process pwsh -WindowStyle Minimized -ArgumentList '-NoProfile','-File','${CLAUDE_SKILL_DIR}/scripts/implement-loop.ps1','-Scope','<the scope typed>'` (plus `'-Model','<m>'` when `--model` was given; the script defaults to Opus); elsewhere `nohup pwsh -NoProfile -File … >/dev/null 2>&1 &`. Tell the user how to stop it (`… implement-loop.ps1 -Stop` ends it after the current milestone) and that closing this session doesn't.
 2. Watch `.implement/loop/loop.log` with Monitor (re-arm it when it expires) and relay each `RUN` / `DONE` / `FAIL` / `LIMIT` / `NEEDS YOU` / `ALL DONE` / `STOP` / `END` line as one line. Never read the `run-<n>.jsonl` transcripts unless a run failed and the user asks.
 3. When it ends, print the run report (as `status` does), leading with what needs the user.
 
@@ -81,7 +81,7 @@ Arguments: $ARGUMENTS
 
 ## End of run
 
-1. **Each milestone's verification** (run by this session in both modes, once every WP is landed): run every acceptance criterion; anything unmet that belongs to a later milestone → rule 10; interactive-only criteria → offer the checks now, otherwise doc-sync sets `awaiting user check`; doc-sync lands what qualifies. This is a guided milestone's only doc-sync and a swarm milestone's last one.
+1. **Each milestone's verification** (once every WP is landed; guided: run by this session, swarm: delegated per swarm.md §1): run every acceptance criterion; anything unmet that belongs to a later milestone → rule 10; interactive-only criteria → offer the checks now, otherwise doc-sync sets `awaiting user check`; doc-sync lands what qualifies. This is a guided milestone's only doc-sync and a swarm milestone's last one.
 2. **No separate final doc-sync.** Each landing doc-sync also updates the project CLAUDE.md status lines and README; the one that lands the plan's last gate sets the plan header `implemented` (only with Definition-of-done evidence and no open `deferred` entry naming a landed milestone).
 3. **Whole-tree gates:** `git grep -nE 'NOTE FOR|FU-TBD' -- . ':!.claude' ':!docs'` → nothing; no worktree or `worktree-agent-*` branch remains for a merged or empty WP (kept blocked branches are listed instead).
 4. **Run report** from `${CLAUDE_SKILL_DIR}/templates/run-report.md`, in chat. Lead with what needs the user: interactive checks with exact commands, decisions marked "needs user", blocked work, decisions to review grouped by Kind.

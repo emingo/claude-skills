@@ -1,7 +1,7 @@
 #Requires -Version 7.0
 # Unattended multi-milestone driver for /implement: one fresh headless Claude session per milestone, so no session
 # carries one milestone's context into the next. Sessions hand off only through git, the docs and a small state file.
-#   pwsh -NoProfile -File implement-loop.ps1 [-Scope all|next|<id>..<id>] [-MaxIterations 20] [-Model sonnet]
+#   pwsh -NoProfile -File implement-loop.ps1 [-Scope all|next|<id>..<id>] [-MaxIterations 20] [-Model opus]
 # -Model is the coordinator's model; workers and reviewers get theirs per work package.
 #   pwsh -NoProfile -File implement-loop.ps1 -Stop      # stop cleanly after the current milestone
 # Run from the repo root. Files live in .implement/loop/ (self-ignored, so the tree stays clean):
@@ -10,7 +10,7 @@ param(
     [string] $Scope = 'all',
     [int] $MaxIterations = 20,
     [int] $MaxLimitWaits = 12,
-    [string] $Model = 'sonnet',
+    [string] $Model = 'opus',
     [switch] $Stop
 )
 $ErrorActionPreference = 'Stop'

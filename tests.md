@@ -164,7 +164,7 @@ This test drives the coordinator in-session with `--step`; Test 12 covers the un
 /implement all --agents 3 --step
 ```
 - [ ] The **up-front design round** asks every undecided `D<n>` across M2+ in batches of four, with a "Decide autonomously" option. Pick that option for at least one question. Then it commits `Approve M2–Mn milestone docs` and ends the turn telling you to `/clear` and re-run (design and implementation never share a session). Do that: `/clear`, then `/implement all --agents 3 --step`.
-- [ ] Each milestone's `.0` runs alone as a `wp-worker` before any other worker starts on that milestone; workers run on Sonnet except WPs marked `Model: opus`; reviewers are launched with an explicit model (`full` → Opus, `light` → Sonnet), and a WP whose report shows a review is not reviewed again by the coordinator.
+- [ ] Each milestone's `.0` runs alone as a `wp-worker` before any other worker starts on that milestone; workers run on Haiku except WPs marked `Model: opus`, and a worker whose build or tests failed is retried on Sonnet; reviewers are launched with an explicit model (`full` → Opus, `light` → Sonnet), and a WP whose report shows a review is not reviewed again by the coordinator.
 - [ ] Build and test output never appears in full in the chat — only summary lines.
 - [ ] Worker briefs carry capped build commands (`dotnet build -m:<n>` with `<n>` ≈ cores ÷ (workers + 1), `dotnet test --no-build`).
 - [ ] No more than 3 workers run at once (`git worktree list` in another terminal).
@@ -178,7 +178,8 @@ This test drives the coordinator in-session with `--step`; Test 12 covers the un
 
 Let it finish. Then check:
 - [ ] Every merge is `Merge <M> WPx.y: …` followed by `Record follow-ups for <M> WPx.y`, and every merged WP appears in a later `Sync docs for <M> <WP ids> (<shas>)` commit — one per wave, not one per merge, none for `.0` alone, and the last one is the landing sync (`git log --oneline`). The overview's WP table marks each `☑ landed (<sha>)`; `as-built.md` has entries only for WPs that deviated.
-- [ ] Once a milestone's WPs are all landed its overview says `in progress (verification)` until the landing sync, and no worker is launched for verification.
+- [ ] Once a milestone's WPs are all landed its overview says `in progress (verification)` until the landing sync. The acceptance commands are run by a `general-purpose` agent on Haiku that answers one line per criterion; the coordinator doesn't run them itself, and no `wp-worker` is launched for verification.
+- [ ] The run report's Agents line names the WPs retried Haiku → Sonnet (or "none").
 - [ ] Follow-up files in `docs/fu/` are sequential and unique, the generated index lists each one, and the decision you left to the agents appears with `kind: decision`.
 - [ ] `git grep -n FU-TBD -- . ':!.claude' ':!docs'` returns nothing, and no `.implement/` folder exists.
 - [ ] `git worktree list` shows only the main checkout; `git branch --list 'worktree-agent-*'` shows nothing (or only branches the run report lists as **Blocked**).
@@ -231,7 +232,7 @@ claude
 /implement all
 ```
 - [ ] After the design round and the `Approve …` commit, it starts `implement-loop.ps1` detached (a minimized PowerShell window on Windows), says how to stop it (`-Stop`), and relays loop lines (`RUN`, `DONE`, …) one line each. Closing the session doesn't stop the loop.
-- [ ] `loop.log`'s `START` and `RUN` lines show `model=sonnet` / `--model sonnet` (no `--model` given), and each `DONE` line ends with `· cost <model> $…` per model — Opus appears only for `Model: opus` workers and `full` reviews. Re-running with `/implement all --model opus` shows `model=opus` instead.
+- [ ] `loop.log`'s `START` and `RUN` lines show `model=opus` / `--model opus` (no `--model` given), and each `DONE` line ends with `· cost <model> $…` per model — Haiku for the workers and the verification runner, Sonnet for doc-sync, `light` reviews and retries, Opus for the coordinator, `Model: opus` workers and `full` reviews. Re-running with `/implement all --model sonnet` shows `model=sonnet` instead.
 - [ ] `.implement/loop/` holds `loop.log`, `state.json` and `run-<n>.jsonl`, and `git status` stays clean (the folder ignores itself).
 - [ ] Each milestone ran in its own session: one `run-<n>.jsonl` per milestone, each starting with a fresh context.
 - [ ] Run `pwsh -NoProfile -File <skills>/implement/scripts/implement-loop.ps1 -Stop` from another terminal: the loop logs `STOP requested`, finishes the current milestone, and ends with `STOPPED on request`.

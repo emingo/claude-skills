@@ -4,6 +4,12 @@ Every change to the global CLAUDE.md, an agent, or a skill gets an entry here, n
 
 ## 2026-10-07
 
+- **wp-worker, implement, repo** — **Trial, on branch `haiku-workers`:** Haiku 5.5 workers under an Opus coordinator that delegates more. The idea is to spend on the one session that makes decisions and save on the many that execute a WP file with frozen contracts and named files. Roll back with `git switch lean-skills` and `scripts/sync.sh apply --force`.
+  - `wp-worker` is `model: haiku` (the CLI resolves both `haiku` and `claude-haiku-5-5` to Haiku 5.5 — checked). A WP's `Model: sonnet` now means "the default worker"; `Model: opus` still gets Opus. Lint allows `haiku` for `wp-worker` only.
+  - A Haiku worker whose build, tests or logic fail is retried once on Sonnet, and the run report lists those WPs. That list, with the per-model cost on each `DONE` line, is how to judge the trial: Anthropic's own page says Sonnet remains the better choice for complex agentic coding, so a high retry rate means the saving is gone.
+  - The loop's coordinator default is back to Opus (`--model sonnet` for the earlier setup). To keep that affordable it no longer runs the acceptance commands itself: a `general-purpose` agent on Haiku runs them to logs and answers one line per criterion.
+  - Unchanged: reviewers (`full` → Opus, `light` → Sonnet) and doc-sync (Sonnet). A reviewer is the check on Haiku-written code, so it stays where it was.
+
 - **global, milestone, implement, walkthrough, impl-plan, repo** — Less text loads in every session. Skill and agent descriptions and the global CLAUDE.md are the always-on cost, paid in sessions that never touch a plan.
   - The `milestone`, `implement` and `walkthrough` descriptions were 840–1,014 characters each, mostly mode syntax that `argument-hint` and the skill body already carry. They now say when to use the skill, in under 500. `scripts/lint.sh` fails on a longer one.
   - The global CLAUDE.md's "Documentation Workflow section" rule was 2.4 KB — a quarter of the file — and applies only while writing a project CLAUDE.md. Its content moved verbatim to `impl-plan/reference/claude-md-section.md`; the global file keeps a pointer, and `/impl-plan` step 7 reads the same file instead of restating it.

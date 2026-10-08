@@ -30,7 +30,7 @@ for a in agents/*.md; do
     [[ $tools == "Read, Grep, Glob, Bash" && -z $model ]] || fail "$a" "reviewers have tools: Read, Grep, Glob, Bash (git reads only) and omit model"
     grep -q '^## Getting the change' "$a" || fail "$a" "reviewers need the 'Getting the change' section (git-only Bash, review depth)"
   elif [[ $tools == *Write* || $tools == *Edit* ]]; then
-    [[ $model == sonnet ]] || fail "$a" "agents that write files use model: sonnet"
+    [[ $model == sonnet || ($n == wp-worker && $model == haiku) ]] || fail "$a" "agents that write files use model: sonnet (wp-worker: haiku, while the Haiku-worker trial runs)"
   fi
 done
 
