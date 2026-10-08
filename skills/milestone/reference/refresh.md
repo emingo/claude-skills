@@ -65,7 +65,7 @@ On the user's go-ahead, regenerate the doc from the template (skeleton rules sti
 3. If a decision implies a plan edit (a §Decision, register answer, or gate), show the exact edit; apply only if the user agrees, and name it in the approval commit message.
 4. Set `Status: approved (YYYY-MM-DD)` in the doc and the gate's status line in the plan. New dependencies implied by a decision follow the Stack rule (ask, then edit Stack).
 
-A doc whose `Written against` is HEAD and whose questions are all decided skips straight to step 4 — so `refresh` also serves as "prepare to implement".
+A doc with nothing to recheck — `Written against` is HEAD, or the only commits since then are the doc's own (the commit that added it, a mode switch) — skips steps 1–3; if its questions are all decided too it goes straight to step 4, so `refresh` also serves as "prepare to implement".
 
 ## Autonomous approval (`--autonomous`)
 

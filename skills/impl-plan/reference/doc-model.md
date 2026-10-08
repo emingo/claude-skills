@@ -74,8 +74,8 @@ Each transition has exactly one owner; nobody else makes it.
 | Transition | Owner |
 |---|---|
 | Plan `draft` → `approved` | `/impl-plan` hand-off, `/milestone` load, or `/implement` preflight (user confirms) |
-| Gate `not written` → `proposed` | `/milestone`, only for docs it wrote in that run |
-| Doc `proposed` → `approved`, gate → `approved` | `/milestone refresh` (after reviewer decisions; `--autonomous` only when invoked by `/implement` in swarm mode) |
+| Gate `not written` → `proposed` | `/milestone`, only for docs it wrote in that run (or `/implement`'s just-in-time writer agent, which follows `/milestone`) |
+| Doc `proposed` → `approved`, gate → `approved` | `/milestone refresh` (after reviewer decisions; `--autonomous` only when invoked by `/implement` in swarm mode) — or `/implement` itself for a doc its writer agent wrote just in time, where there is nothing to recheck |
 | Doc → `in progress (WPx.n)` / `in progress (verification)`; gate → `in progress`; plan header → `in progress — <ids> active` | `/implement`, when it starts work on the milestone (a 1–3 line edit; it knows the values) |
 | WP markers `☑ landed` / `⛔ blocked` | `/implement`, with the commit or after the merge or failure it just handled (never for a reverted merge or a `Stub …` commit) |
 | Doc → `in progress (awaiting user check)` | `doc-sync`, when only interactive criteria remain |

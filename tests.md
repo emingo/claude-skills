@@ -28,6 +28,7 @@ Manual end-to-end runbook for the planning, implementation and review skills (`/
 | `implement` — swarm, resume, salvage, cleanup, `--step`, per-wave sync | 7 |
 | `implement` — unattended loop (`implement-loop.ps1`, `--unattended`, state file) | 12 |
 | `implement` — merge gates | 8 |
+| `implement` — just-in-time docs (writer agent, no recheck, `--auto-approve`) | 13 |
 | `implement` — `status`, forbidden paths | 9 |
 | `followup` — Kind, Why accepted, Revisit when | 1, 2, 5, 7, 9 |
 | `doc-sync` — milestone markers, landing rules, drift repair | 5, 7, 8, 9 |
@@ -238,6 +239,20 @@ claude
 - [ ] Run `pwsh -NoProfile -File <skills>/implement/scripts/implement-loop.ps1 -Stop` from another terminal: the loop logs `STOP requested`, finishes the current milestone, and ends with `STOPPED on request`.
 - [ ] Running `/implement` in an interactive session while the loop runs reports the running loop instead of starting a second coordinator (the loop's own `--unattended` sessions don't stop on it).
 - [ ] A milestone with only interactive criteria ends as `awaiting-check` and the loop moves on; a "needs user" decision stops the loop with `NEEDS YOU`.
+
+## Test 13: just-in-time doc (same scratch folder)
+
+Pick an unlanded milestone whose dependencies have landed, say M3. Remove its doc so it has to be written just in time: delete `docs/milestones/M3-<slug>/`, drop its row from `docs/milestones/README.md`, set its plan gate back to `not written`, and commit. New session:
+```
+/implement M3 --auto-approve
+```
+- [ ] After the baseline it launches **one** `general-purpose` agent on Sonnet (or better) to write M3's doc; the session itself never loads `/milestone` and writes no doc file.
+- [ ] The agent's reply is the short report: folder and sizes, open decisions with Proposal and Alternative, Opus WPs, consistency issues, ledger entries to re-defer.
+- [ ] No refresh runs. With `--auto-approve` no question is asked: every open `D<n>` bullet becomes its Proposal, marked `(<date>, autonomous, FU-NNN)` where it shapes a contract, layout or behavior, and those follow-ups exist with `kind: decision`.
+- [ ] One commit `Add and approve the M3 milestone doc` holds the folder, the index row, the gate (`approved`) and the ledger entries.
+- [ ] It then starts WP3.0 in the **same** session — no "`/clear`, then `/implement`".
+- [ ] Repeat on another milestone **without** `--auto-approve`: the open decisions are asked in batches of four (Proposal recommended, Alternative, "Decide autonomously"), answers are recorded as `(<date>, user)`, and implementation starts right after the commit.
+- [ ] A milestone whose doc was written earlier with `/milestone` and committed: `/implement` refreshes it without re-reading the code (nothing but the doc's own commit landed since) and only asks its open decisions.
 
 ## Test 10: point-by-point walkthrough
 
