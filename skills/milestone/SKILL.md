@@ -17,7 +17,7 @@ Arguments: $ARGUMENTS
 - **Never overwrite an existing doc wholesale** — that's what `refresh` is for.
 - **Never commit.** Suggest the commit message at the end.
 - **Never create the ledger or write entries by hand** — `/followup` only.
-- **Stay within the size budgets** (doc-model, Milestone doc layout): overview ≤ 12 KB, each WP file ≤ 6 KB. Reference the plan by `§`, put a decision's reasoning in one line, and split a WP that won't fit.
+- **Stay within the size budgets** (doc-model, Milestone doc layout): overview 12 KB as the aim and 16 KB at most, each WP file ≤ 6 KB. Reference the plan by `§`, put a decision's reasoning in one line, and split a WP that won't fit.
 - **Keep every required template heading** (an empty one says `None — <reason>`) and leave out the ones the template marks Optional when they'd be empty; strip every `<!-- guidance -->` comment. The `<Project obligation>` placeholder becomes the Section profile's sections, or is removed when the profile is "Default sections only".
 - **No work package introduces a dependency outside the plan's Stack.** If one is needed, ask the user (what it does / the no-dependency alternative) before drafting, and edit Stack only on approval.
 - **Skeleton fields are the main agent's alone:** dependencies, work-package file ownership, contracts, acceptance criteria, Section profile. Drafting subagents may object, never change them.
@@ -85,7 +85,7 @@ Re-read every doc's header, work packages (incl. their `Ledger:` fields), contra
 8. Every `[VERIFY]` / register question has exactly one owning milestone, where it appears as a `D<n>` design question.
 9. WP ids are unique, sequential and in the doc-authoring form; `.0` follows the convention and no WP is a verification step; every required template heading is present; no guidance comments remain; no WP uses a package outside Stack.
 10. Every WP has `After:`, `Model:` and `Review:`; each `Model: opus` names the unsettled design choice that earns it, and more than a third of a doc's WPs on `opus` is reported with the WPs to reconsider; the `After:` graph is acyclic; manifests, project/solution files and registries are owned by `.0` or explicitly sequenced; every header has `Execution`.
-11. Size budgets hold (`wc -c`): overview ≤ 12 KB, each WP file ≤ 6 KB. Over → cut restated plan text and long rationale first, then split the WP.
+11. Size budgets hold (`wc -c`): overview ≤ 16 KB (aim for 12; one trimming pass at most — the budget saves reading, and repeated trimming costs more than it saves), each WP file ≤ 6 KB. Over → cut restated plan text and long rationale first, then split the WP.
 
 Fix what's fixable; report anything that needs the user.
 

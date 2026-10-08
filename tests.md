@@ -79,7 +79,7 @@ The empty commit matters: the skills record the commit each doc was written agai
 
 **Check the milestone docs for:**
 - [ ] With 4+ docs, drafting ran in parallel subagents after a skeleton table was built.
-- [ ] Each milestone is a folder `docs/milestones/M<n>-<slug>/` with `overview.md`, one `WP<id>.md` per work package and `as-built.md`. Overviews are ≤ 12 KB and WP files ≤ 6 KB.
+- [ ] Each milestone is a folder `docs/milestones/M<n>-<slug>/` with `overview.md`, one `WP<id>.md` per work package and `as-built.md`. Overviews are ≤ 16 KB (most near 12) and WP files ≤ 6 KB.
 - [ ] Each overview's header has Status `proposed`, Depends on / Blocks / Can run alongside, `Execution: guided`, and Written against with a commit SHA. Its WP table lists every WP file with After, Model and Review.
 - [ ] Decisions are one bullet each, `D1`, `D2`… (open: Proposal / Alternative); there is no Reviewer decisions or Refresh log section. Work packages are `WP1.0` … `WPn.N`; `.0` applies reviewer decisions **and owns the shared files** (`.csproj`, `.sln`, package references); no package is a verification step (the overview's WP table has no such row).
 - [ ] Every WP file has `**After:**`, `**Model:**` (`sonnet` unless the WP must make a design choice the doc doesn't settle — at most a third on `opus`, each with that reason) and `**Review:**` (`light` for test-only or tooling WPs), and no two packages that `After:` leaves unordered list the same file.
@@ -126,7 +126,7 @@ Runs against private repos, so it lives in the untracked `tests.local.md` (see S
 ```
 /implement M0
 ```
-- [ ] Preflight runs the build and tests first (and offers `/fewer-permission-prompts` if they aren't allow-listed), then shows a run plan and asks "Start?" once.
+- [ ] Preflight runs the build and tests first (and offers `/fewer-permission-prompts` if they aren't allow-listed), then prints a run plan and goes on without asking "Start?" (it asks only when the plan holds a surprise: fallback reviewer, a forced guided milestone, a readiness failure, a worktree-base warning). Untracked files outside every work package's paths are listed, not asked about.
 - [ ] The run plan names the stack reviewer. With no "Agents" section in the global or project CLAUDE.md (point `CLAUDE_CONFIG_DIR` at a scratch config holding only the skills and agents), it says it is falling back to `reviewer`; with `reviewer` not installed either, it stops and asks which agent to use.
 - [ ] M0's doc gets refreshed if it's stale, committed as `Approve the M0 milestone doc`.
 - [ ] For **each** work package: implement → tests → the stack reviewer (`csharp-reviewer`) → **one** commit `… (M0 WP0.n)` that also holds the `☑ landed` marker and any ledger entry, with a `Deviation:` line in its body if it differed from the WP file → **pause** with a summary (commit, test counts, reviewer findings, deviations, follow-ups with Kind, next WP). No doc-sync and no `Sync docs` commit between work packages.
@@ -166,7 +166,8 @@ This test drives the coordinator in-session with `--step`; Test 12 covers the un
 ```
 - [ ] The **up-front design round** asks every undecided `D<n>` across M2+ in batches of four, with a "Decide autonomously" option. Pick that option for at least one question. Then it commits `Approve M2–Mn milestone docs` and ends the turn telling you to `/clear` and re-run (design and implementation never share a session). Do that: `/clear`, then `/implement all --agents 3 --step`.
 - [ ] Each milestone's `.0` runs alone as a `wp-worker` before any other worker starts on that milestone; workers run on Haiku except WPs marked `Model: opus`, and a worker whose build or tests failed is retried on Sonnet; reviewers are launched with an explicit model (`full` → Opus, `light` → Sonnet), and a WP whose report shows a review is not reviewed again by the coordinator.
-- [ ] Build and test output never appears in full in the chat — only summary lines.
+- [ ] Build and test output never appears in full in the chat — only summary lines. Each merge is one `merge-wp.sh` call (merge, build, test, gates); the coordinator writes no merge script of its own.
+- [ ] Every worker launches its reviewer in the foreground and ends with the one-line `BRANCH … · SHA … · STATUS … · REPORT …` message; none hands back `partial` for a missing review. A worker whose worktree started from a foreign commit re-branches to `<m>-<wp>` from the base and says so.
 - [ ] Worker briefs carry capped build commands (`dotnet build -m:<n>` with `<n>` ≈ cores ÷ (workers + 1), `dotnet test --no-build`).
 - [ ] No more than 3 workers run at once (`git worktree list` in another terminal).
 
@@ -238,6 +239,8 @@ claude
 - [ ] Each milestone ran in its own session: one `run-<n>.jsonl` per milestone, each starting with a fresh context.
 - [ ] Run `pwsh -NoProfile -File <skills>/implement/scripts/implement-loop.ps1 -Stop` from another terminal: the loop logs `STOP requested`, finishes the current milestone, and ends with `STOPPED on request`.
 - [ ] Running `/implement` in an interactive session while the loop runs reports the running loop instead of starting a second coordinator (the loop's own `--unattended` sessions don't stop on it).
+- [ ] The coordinator session never ends a turn while a worker is running: between merges it sits in `wait-workers.ps1` calls, so a worker that takes longer than ten minutes doesn't end the session. If a session does die after committing work, the log says `INTERRUPTED … resuming` and the loop goes on instead of stopping after two.
+- [ ] With a one-milestone scope (`/implement M4`), the loop logs `ALL DONE — scope M4 is one milestone` right after `DONE` and starts no second session.
 - [ ] A milestone with only interactive criteria ends as `awaiting-check` and the loop moves on; a "needs user" decision stops the loop with `NEEDS YOU`.
 
 ## Test 13: just-in-time doc (same scratch folder)
@@ -246,12 +249,13 @@ Pick an unlanded milestone whose dependencies have landed, say M3. Remove its do
 ```
 /implement M3 --auto-approve
 ```
-- [ ] After the baseline it launches **one** `general-purpose` agent on Sonnet (or better) to write M3's doc; the session itself never loads `/milestone` and writes no doc file.
-- [ ] The agent's reply is the short report: folder and sizes, open decisions with Proposal and Alternative, Opus WPs, consistency issues, ledger entries to re-defer.
+- [ ] Right after the resume check — alongside the baseline, before any question — it launches **one** `general-purpose` agent on Sonnet (or better) for M3's doc; the session itself never loads `/milestone` and writes no doc file.
+- [ ] Within about three minutes the agent hands back a `SCAN` report (work packages, decisions for the user, split suggestion). The session resumes the same agent with SendMessage to write the doc; the final reply is the short doc report (sizes, open decisions, Opus WPs, consistency issues, ledger entries to re-defer). The overview was written once, last, and is at most 16 KB.
+- [ ] Only choices that shape a contract, a file layout or visible behaviour come back as decisions; the rest are already decided bullets marked `(<date>, autonomous)`.
 - [ ] No refresh runs. With `--auto-approve` no question is asked: every open `D<n>` bullet becomes its Proposal, marked `(<date>, autonomous, FU-NNN)` where it shapes a contract, layout or behavior, and those follow-ups exist with `kind: decision`.
 - [ ] One commit `Add and approve the M3 milestone doc` holds the folder, the index row, the gate (`approved`) and the ledger entries.
 - [ ] It then starts WP3.0 in the **same** session — no "`/clear`, then `/implement`".
-- [ ] Repeat on another milestone **without** `--auto-approve`: the open decisions are asked in batches of four (Proposal recommended, Alternative, "Decide autonomously"), answers are recorded as `(<date>, user)`, and implementation starts right after the commit.
+- [ ] Repeat on another milestone **without** `--auto-approve`: the first batch of questions arrives while the doc is still being written, an answer that differs from its Proposal is sent to the writer as an amendment in one message, and nothing is asked after the last answer. The decisions are asked in batches of four (Proposal recommended, Alternative, "Decide autonomously"), answers are recorded as `(<date>, user)`, and implementation starts right after the commit.
 - [ ] A milestone whose doc was written earlier with `/milestone` and committed: `/implement` refreshes it without re-reading the code (nothing but the doc's own commit landed since) and only asks its open decisions.
 
 ## Test 10: point-by-point walkthrough

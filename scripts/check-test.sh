@@ -66,10 +66,10 @@ wps_have_after() {
   done < <(wpfiles)
   [[ -z $out ]] || { echo "WP files without After/Model/Review:$out"; return 1; }
 }
-# budgets: overview ≤ 12 KB, WP files ≤ 6 KB
+# budgets: overview ≤ 16 KB (12 is the aim), WP files ≤ 6 KB
 budgets() {
   local f out=
-  for f in "${docs[@]}"; do [[ $(wc -c <"$f") -le 12288 ]] || out+=" ${f#$MS/}"; done
+  for f in "${docs[@]}"; do [[ $(wc -c <"$f") -le 16384 ]] || out+=" ${f#$MS/}"; done
   while read -r f; do [[ $(wc -c <"$f") -le 6144 ]] || out+=" ${f#$MS/}"; done < <(wpfiles)
   [[ -z $out ]] || { echo "over budget:$out"; return 1; }
 }
@@ -129,7 +129,7 @@ test_1() {
   check "every doc: Written against a commit sha" lacking '^\*\*Written against:\*\* `[0-9a-f]{7,}`'
   check "every WP file has After, Model and Review" wps_have_after
   check "every WP file is a row of its overview's WP table" wp_rows
-  check "size budgets: overview ≤ 12 KB, WP files ≤ 6 KB" budgets
+  check "size budgets: overview ≤ 16 KB, WP files ≤ 6 KB" budgets
   check "every milestone folder has as-built.md" lacking_asbuilt
   check "no dropped sections in the overviews" absent '^## (Reviewer decisions|Refresh log|Spec references|Follow-up ledger reconciliation)' "${docs[@]}"
   check "docs with unlanded dependencies mark What exists as Projected" projected

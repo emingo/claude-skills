@@ -2,6 +2,18 @@
 
 Every change to the global CLAUDE.md, an agent, or a skill gets an entry here, newest first. Record the *why* — the git diff already shows the what.
 
+## 2026-10-08
+
+- **implement, wp-worker, milestone, doc-model** — Fixes from the first two Haiku-trial runs (project A's M37 and M41) and a faster path to the first question. M37 landed in 35 minutes for $9.15; M41's loop died twice and had to be finished by hand.
+  - **Unattended sessions died after ten idle minutes.** Both M41 sessions exited exactly ten minutes after their last turn, each while a single long worker was running (12:28:02 → 12:38:03, 12:59:45 → 13:09:46). A headless session that ends its turn to wait is not kept alive by a background agent. The coordinator now waits in the foreground with `scripts/wait-workers.ps1` (nine minutes per call, repeated) and takes a finished worker's result from its worktree. The loop also stops counting a session that died after committing work as a failure: it logs `INTERRUPTED` and resumes.
+  - **Reviewers ran in the background.** The Agent tool backgrounds subagents by default, so a worker that didn't say otherwise returned before its review did. In M37 the three such workers handed back `partial` and two were escalated to Sonnet for nothing; in M41 one WP was reviewed twice. `wp-worker` and the brief now say foreground, and a `partial` whose only gap is the review is finished by the coordinator without a retry.
+  - **Agent worktrees started from `origin/HEAD`, not the run branch.** In M37 that put another milestone's commits under every worker. The brief's first step now fast-forwards when the worktree is behind and re-branches from the base when it holds foreign commits, the worker is told never to repair history itself, and preflight warns when `origin/HEAD` isn't an ancestor of the run branch. The setting that fixes the cause (`worktree.baseRef`) is the user's to change.
+  - **The coordinator wrote its own merge script in both runs.** `scripts/merge-wp.sh` now ships with the skill: merge, build, test and the standard gates in one call, result lines only. With Haiku workers at 7% of M37's cost, the coordinator's turn count is what is left to cut.
+  - **A one-milestone scope ends when that milestone lands** — M37's loop spent $0.49 on a second session to report there was nothing left.
+  - **Just-in-time docs ask sooner.** Preparing M41 took 53 minutes, 34 of them waiting on answers that could not be asked until a 13-minute writer run had finished. The writer now hands back a two-minute scan first (work packages, the decisions only the user can make), is resumed in the background to write on its own proposals, and gets differing answers as one amendment. It raises only decisions that shape a contract, a layout or visible behaviour, and suggests a split above about eight work packages instead of absorbing it.
+  - **The overview budget is 16 KB, aiming for 12.** M41's writer wrote its overview three times to get under 12 KB; with Haiku workers the reading cost of 2 KB is less than one trimming pass on Sonnet.
+  - **Fewer stops in preflight:** untracked files outside every work package's paths are listed instead of asked about, and "Start?" is asked only when the run plan holds a surprise.
+
 ## 2026-10-07
 
 - **implement, milestone, doc-model** — A milestone with no doc can now go from `/implement <id>` straight to code. Before, `/implement` invoked `/milestone` in its own session (about 39 KB of authoring rules plus the code exploration), then ran a full refresh on the doc it had just written, and then stopped so a fresh session could implement.

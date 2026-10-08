@@ -20,7 +20,7 @@ Let `<sha>` = the doc's `Written against` (if missing, use the commit that last 
 | What exists | **Rewrite** as a real inventory of the current code — it's a snapshot, not history. Drop the *Projected* marker. |
 | Entry criteria | Each one met? Unmet → say so; that alone may mean "not ready", not "rewrite". |
 | Decisions (`D<n>`) | Already answered by a landed as-built or a register answer? Mark `Answered by <ref>` and fold it into the Proposal. Obsolete? Say why. New questions surfaced by deviations or ledger entries? Add them with the next free `D<n>`. |
-| Work packages | Files still exist / were renamed / were created by someone else? Scope still needed? `Model:` / `Review:` still right? Then run the **Swarm-readiness check** below. Every WP file is still within 6 KB and the overview within 12 KB. |
+| Work packages | Files still exist / were renamed / were created by someone else? Scope still needed? `Model:` / `Review:` still right? Then run the **Swarm-readiness check** below. Every WP file is still within 6 KB and the overview within 16 KB. |
 | Contracts | Consumed contracts match the real signatures in code, not the owner doc's planned shape. Introduced contracts don't collide with anything that landed. |
 | Acceptance | Named tests and commands still valid; criteria still cover the gate. |
 | Ledger | Re-grep the ledger's open entries for the doc's owned files and areas (doc-model "Finding entries") and bring each WP's `Ledger:` field up to date: new overlaps get a disposition, resolved entries drop out. |

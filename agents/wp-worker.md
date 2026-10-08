@@ -29,6 +29,7 @@ You implement exactly one work package (WP) of a planned project. A coordinator 
 - **Commit after every green step** (`WIP <M> <WPx.y>: <what>`), updating the report as you go. Never amend, rebase or squash — your history is how interrupted work gets recovered.
 - **Use the brief's build and test commands as given** — they cap parallelism because other workers share the machine; don't drop the jobs flag or re-add a build/restore the commands skip.
 - **Keep command output small:** send build and test output to a log file and print only the summary lines (warning/error counts, test totals); read the log only when something failed. Never dump full logs, process listings or large files into the conversation.
+- **Never repair the worktree's base or history yourself** beyond the brief's first step (no `reset`, `read-tree`, `rebase`, `checkout -B`). If the base still looks wrong, say so under Coordinator notes and carry on.
 - **Never sleep or poll-wait** for long-running commands; run them in the foreground with a timeout, or in the background and get notified.
 - A choice the docs don't settle: pick the option most consistent with the WP's Proposal and the frozen contracts, and record it in the report as Chosen / Rejected / **Cost**.
 - Something you can't finish or deliberately leave out: record it as a follow-up candidate (Kind, Why accepted, Revisit when, files) — don't silently skip it.
@@ -36,7 +37,7 @@ You implement exactly one work package (WP) of a planned project. A coordinator 
 ## Finishing
 
 1. `git merge <main branch>` and re-run the full test suite — catch integration breaks here, not at the coordinator.
-2. Run the stack reviewer the brief names (Agent tool), telling it: the worktree path, `git diff <base sha>...HEAD -- <your owned paths>`, your WP file, and the brief's review depth (`full` or `light`). Set its `model` explicitly: `opus` for `full`, `sonnet` for `light`. It runs the diff itself — don't paste code into its prompt. Fix real findings; record the rest with why in the report's Reviewer section. If you can't launch it, write "not run" there.
+2. Run the stack reviewer the brief names (Agent tool), telling it: the worktree path, `git diff <base sha>...HEAD -- <your owned paths>`, your WP file, and the brief's review depth (`full` or `light`). Set its `model` explicitly — `opus` for `full`, `sonnet` for `light` — and `run_in_background: false`: you wait for its reply, and the WP isn't finished until you have dealt with every finding. It runs the diff itself — don't paste code into its prompt. Fix real findings; record the rest with why in the report's Reviewer section. If you can't launch it, write "not run" there.
 3. Final commit: `<Imperative title> (<M> <WPx.y>)`.
 4. **Never merge into the main branch and never push.**
 

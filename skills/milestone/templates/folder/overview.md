@@ -9,7 +9,7 @@
 
 Spec source: [plan](../../<plan>.md) §<gate ref>, §<spec refs>. Work packages: one file each in this folder. As built: [as-built.md](as-built.md).
 
-<!-- Budget for this whole file: 12 KB — reference the plan by §, never restate it. A section whose comment says Optional is left out when it would be empty; every other section is required. -->
+<!-- Budget for this whole file: aim for 12 KB, 16 KB at most — reference the plan by §, never restate it. A section whose comment says Optional is left out when it would be empty; every other section is required. -->
 
 ## Objective
 

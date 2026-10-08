@@ -62,6 +62,8 @@ Set-Content -Path $lock -Value $PID
 Remove-Item $stopFile -ErrorAction SilentlyContinue
 
 $failures = 0; $limitWaits = 0; $code = 0
+# A scope that names one milestone is finished once that milestone lands — no second session just to say so.
+$single = $Scope -match '^[A-Za-z]+\d+[a-z]?$'
 try {
     Write-Log "START scope=$Scope max=$MaxIterations model=$Model"
     # break/continue inside a PowerShell switch act on the switch, so the loop is labeled
@@ -73,6 +75,7 @@ try {
                   '--permission-prompts', 'none', '--strict-mcp-config', '--name', "implement loop $i")
         if ($Model) { $claudeArgs += @('--model', $Model) }
         Write-Log "RUN $i — claude -p '/implement $Scope --unattended' --model $Model → $run"
+        $head = (git rev-parse HEAD 2>$null)
         $global:LASTEXITCODE = 0
         & claude @claudeArgs *> $run
         $exit = $LASTEXITCODE
@@ -83,6 +86,9 @@ try {
                 if (++$limitWaits -gt $MaxLimitWaits) { Write-Log "STOP — usage limit persisted through $MaxLimitWaits waits"; $code = 1; break }
                 Write-Log "LIMIT — no state file; waiting 30 min (wait $limitWaits/$MaxLimitWaits)"; Start-Sleep -Seconds 1800; $i--; continue
             }
+            # A session that died after committing work was interrupted, not broken: the next one resumes from git.
+            $now = (git rev-parse HEAD 2>$null)
+            if ($now -and $head -and $now -ne $head) { $failures = 0; Write-Log "INTERRUPTED — session exited $exit without a state file after making progress ($($head.Substring(0, 7))..$($now.Substring(0, 7))); resuming (see $run)"; continue }
             if (++$failures -ge 2) { Write-Log "STOP — two sessions in a row ended without a state file (last exit $exit, see $run)"; $code = 1; break }
             Write-Log "FAIL — session exited $exit without a state file; retrying once (see $run)"; continue
         }
@@ -92,7 +98,7 @@ try {
         $result = Get-Field $s 'result'; $sha = Get-Field $s 'sha'; $needs = Get-Field $s 'needsUser'; $resetAt = Get-Field $s 'resetAt'
         $line = "$(Get-Field $s 'milestone') $result$(if ($sha) { " $sha" }) — $(Get-Field $s 'summary')"
         switch ($result) {
-            { $_ -in 'landed', 'awaiting-check' } { Write-Log "DONE $line$(Get-ModelCost $run)"; continue iter }
+            { $_ -in 'landed', 'awaiting-check' } { Write-Log "DONE $line$(Get-ModelCost $run)"; if ($single) { Write-Log "ALL DONE — scope $Scope is one milestone"; break iter }; continue iter }
             'limit' {
                 if (++$limitWaits -gt $MaxLimitWaits) { Write-Log "STOP — usage limit persisted through $MaxLimitWaits waits"; $code = 1; break iter }
                 # Compare in UTC: ConvertFrom-Json turns an ISO "…Z" time into a UTC DateTime, and DateTime math ignores Kind.

@@ -22,11 +22,11 @@ A folder per milestone, so each reader opens only its slice.
 
 | File | Holds | Read by | Budget |
 |---|---|---|---|
-| `overview.md` | Header, objective, scope, what exists, entry criteria, **Decisions** (one bullet per `D<n>`), **Work packages table** (id · title · After · Model · Review · Status), contracts introduced, project sections, acceptance criteria, risks | everyone; workers read it with their WP file | 12 KB |
+| `overview.md` | Header, objective, scope, what exists, entry criteria, **Decisions** (one bullet per `D<n>`), **Work packages table** (id · title · After · Model · Review · Status), contracts introduced, project sections, acceptance criteria, risks | everyone; workers read it with their WP file | aim for 12 KB, 16 KB at most |
 | `WP<id>.md` | One work package: After, Model, Review, files owned, the decisions/contracts it touches, the open ledger entries overlapping its files (each with a disposition), scope, tests, definition of done | that WP's worker and reviewer | 6 KB — more means split the WP |
 | `as-built.md` | Append-only, and only what differs from the docs: a note per WP that deviated, the landing record, then dated corrections | doc-sync; the next milestone's refresh | — |
 
-- **Decisions have one home:** the `D<n>` bullet in the overview — open (`Proposal / Alternative`) until decided, then `<chosen>. Rejected: <alt> — <why>. (<date>, user)` or `(…, autonomous, FU-NNN)`. An autonomous decision or one the user wants to revisit also gets a `kind: decision` ledger entry, linked from the bullet; nothing restates it in the as-built record.
+- **Decisions have one home:** the `D<n>` bullet in the overview — open (`Proposal / Alternative`) until decided, then `<chosen>. Rejected: <alt> — <why>. (<date>, user)` or `(…, autonomous)` — with `FU-NNN` when the decision has a ledger entry. An autonomous decision or one the user wants to revisit also gets a `kind: decision` ledger entry, linked from the bullet; nothing restates it in the as-built record.
 - **A refresh is its own commit** (`Refresh <M> milestone doc: <what changed>`) — the doc carries no refresh log.
 - **WP status lives in the overview's table** — the WP file carries none.
 - **Verification is not a work package.** Once every WP is landed, `/implement` runs the overview's Acceptance criteria and doc-sync lands the milestone. A doc written before this rule whose last WP is "verification" → that WP is this step: never run it as a work package or launch a worker for it; `/implement` marks its row `☑ landed` when it sets `in progress (verification)`.
