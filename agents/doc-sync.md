@@ -19,10 +19,10 @@ Read narrowly:
 
 You will be told what task just finished (or given a commit range). Start by grounding yourself in reality:
 
-1. `git log --oneline -15` and, for the relevant commits, `git show --stat <sha>` to see what actually changed.
+1. `git log --oneline -15` and, for the relevant commits, `git show --stat <sha>` to see what actually changed. Given a commit range by `/implement`, also read the commit bodies (`git log --format=%B <range>`) — guided work packages record a `Deviation:` line there.
 2. Read the changed code where a doc claim depends on it. Code and git history are the source of truth — never a doc, never your memory.
 
-When `/implement` invokes you, you also get the merge or commit shas, the work package ids, where each WP report is (swarm: a `git show <sha>:<path>` command — read it yourself), one line of reviewer outcome per WP, and the follow-up ids it opened or resolved. Use them as evidence alongside the code; they are the only source for review claims. The follow-up entries it names **already exist** — append Updates and flip statuses, never create entries or assign ids in that case. It also tells you which WPs are running or next (for the `in progress (…)` line) and which WPs were reverted or stubbed (never mark those landed).
+When `/implement` invokes you, you also get the merge or commit shas, the work package ids, the path of `doc-sync-plan.md`, where each WP report is (swarm: a `git show <sha>:<path>` command — read it yourself, with one line of reviewer outcome per WP), and the follow-up ids it opened or resolved. Use them as evidence alongside the code; they are the only source for review claims. The follow-up entries it names **already exist** — append Updates and flip statuses, never create entries or assign ids in that case. It also tells you which WPs are running or next (for the `in progress (…)` line) and which WPs were reverted or stubbed (never mark those landed).
 
 ## Discover the doc surface
 
@@ -44,7 +44,7 @@ Prioritize in that order; skip categories the project doesn't have.
 
 ## Plan and milestone docs
 
-A project planned with `/impl-plan` + `/milestone` has a plan (gates, one status line per milestone) and a folder per milestone (`overview.md`, one `WP<id>.md` per work package, `as-built.md`). Before editing any of them, read the `impl-plan` skill's `reference/doc-sync-plan.md` — your transitions and what you must leave alone (a project-local `.claude/skills/impl-plan/` copy wins over the user-level one in the Claude config dir). Its `reference/doc-model.md` has the status words; read it only when the invoker didn't spell out which transitions to make. No plan in the project → skip this.
+A project planned with `/impl-plan` + `/milestone` has a plan (gates, one status line per milestone) and a folder per milestone (`overview.md`, one `WP<id>.md` per work package, `as-built.md`). Before editing any of them, read the `impl-plan` skill's `reference/doc-sync-plan.md` — your transitions and what you must leave alone. `/implement` gives you its path; otherwise a project-local `.claude/skills/impl-plan/` copy wins over the user-level one in the Claude config dir. If you can't find or read it, stop and report that instead of editing plan or milestone docs. Its `reference/doc-model.md` has the status words; read it only when the invoker didn't spell out which transitions to make. No plan in the project → skip this.
 
 ## Follow-up ledger
 

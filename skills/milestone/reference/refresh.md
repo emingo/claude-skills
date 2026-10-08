@@ -56,7 +56,7 @@ On the user's go-ahead, regenerate the doc from the template (skeleton rules sti
 - Record what changed — one bullet per changed section: `- <section>: <what changed> — <why: commit, as-built note, FU id, plan edit>`, or `- No changes — nothing relevant landed since \`<old sha>\`.` The bullets go into the refresh/approval commit message body, not the doc.
 - Bump `Written against` to HEAD.
 - Substantive changes (scope, WPs, contracts, criteria) put `Status` back to `proposed` if it was `approved` (and the plan gate line with it).
-- `in progress` doc (explicit user request only): apply the edits and log them, but leave `Status` and the gate alone and skip step 4.
+- `in progress` doc (explicit user request only): apply the edits and list them for the commit message, but leave `Status` and the gate alone and skip step 4.
 
 ## 4. Approval
 

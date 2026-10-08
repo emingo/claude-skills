@@ -128,7 +128,7 @@ Runs against private repos, so it lives in the untracked `tests.local.md` (see S
 - [ ] Preflight runs the build and tests first (and offers `/fewer-permission-prompts` if they aren't allow-listed), then shows a run plan and asks "Start?" once.
 - [ ] The run plan names the stack reviewer. With no "Agents" section in the global or project CLAUDE.md (point `CLAUDE_CONFIG_DIR` at a scratch config holding only the skills and agents), it says it is falling back to `reviewer`; with `reviewer` not installed either, it stops and asks which agent to use.
 - [ ] M0's doc gets refreshed if it's stale, committed as `Approve the M0 milestone doc`.
-- [ ] For **each** work package: implement → tests → the stack reviewer (`csharp-reviewer`) → **one** commit `… (M0 WP0.n)` that also holds the `☑ landed` marker and any ledger entry, with `Review:` (and, if it differed, `Deviation:`) lines in its body → **pause** with a summary (commit, test counts, reviewer findings, deviations, follow-ups with Kind, next WP). No doc-sync and no `Sync docs` commit between work packages.
+- [ ] For **each** work package: implement → tests → the stack reviewer (`csharp-reviewer`) → **one** commit `… (M0 WP0.n)` that also holds the `☑ landed` marker and any ledger entry, with a `Deviation:` line in its body if it differed from the WP file → **pause** with a summary (commit, test counts, reviewer findings, deviations, follow-ups with Kind, next WP). No doc-sync and no `Sync docs` commit between work packages.
 - [ ] When a design question isn't settled by the doc, it **asks** you instead of deciding.
 - [ ] Decline one reviewer finding on purpose. It should become a `Kind: compromise` follow-up with **Why accepted**, landing in that work package's commit.
 - [ ] After the last WP it sets `in progress (verification)`, runs the acceptance criteria and runs doc-sync **once**, committed as `Sync docs for M0 (<first sha>..<last sha>)`. Then M0's overview is `☑ landed (date, sha)`, every row of its WP table says `☑ landed`, its criteria are ticked with real test output, `as-built.md` has a landing record (and a Deviations entry only for a WP that differed), and the plan gate says `landed`. If M0 has an interactive check, you're given the exact command.
@@ -148,7 +148,7 @@ Finish M1 first (`/implement M1`, then "continue to the end of M1"). Then:
 ```
 /milestone mode swarm from M2
 ```
-- [ ] M2 and every later unlanded doc now say `Execution: swarm` (the suggested commit message says so; there is no Refresh log in a folder doc); the plan header says `Execution: swarm`.
+- [ ] M2 and every later unlanded doc now say `Execution: swarm` (the suggested commit message says so); the plan header says `Execution: swarm`.
 - [ ] `git diff` doesn't touch M0 or M1, nor any Status or Written-against line.
 - [ ] Open `D<n>` questions are reported as a note, not a failure.
 
@@ -178,6 +178,7 @@ This test drives the coordinator in-session with `--step`; Test 12 covers the un
 
 Let it finish. Then check:
 - [ ] Every merge is `Merge <M> WPx.y: …` followed by `Record follow-ups for <M> WPx.y`, and every merged WP appears in a later `Sync docs for <M> <WP ids> (<shas>)` commit — one per wave, not one per merge, none for `.0` alone, and the last one is the landing sync (`git log --oneline`). The overview's WP table marks each `☑ landed (<sha>)`; `as-built.md` has entries only for WPs that deviated.
+- [ ] Once a milestone's WPs are all landed its overview says `in progress (verification)` until the landing sync, and no worker is launched for verification.
 - [ ] Follow-up files in `docs/fu/` are sequential and unique, the generated index lists each one, and the decision you left to the agents appears with `kind: decision`.
 - [ ] `git grep -n FU-TBD -- . ':!.claude' ':!docs'` returns nothing, and no `.implement/` folder exists.
 - [ ] `git worktree list` shows only the main checkout; `git branch --list 'worktree-agent-*'` shows nothing (or only branches the run report lists as **Blocked**).
@@ -216,7 +217,7 @@ claude
 
 **Deferred criterion** (same scratch folder, before its milestones land): in an open milestone, say M3, add an acceptance criterion that can only pass once a later milestone, say M4, exists (e.g. "`--watch` re-checks on change" if watch mode is M4). Commit it, then `/implement M3`.
 - [ ] The criterion stays `- [ ]` with a bold reason citing a new `Kind: deferred` follow-up whose `Revisit when` is **M4** (not M3).
-- [ ] M3 still lands; M4 refuses to land while that follow-up is open (doc-sync reports it instead).
+- [ ] M3 still lands — doc-sync treats the deferred criterion as settled, not as "could not fix"; M4 refuses to land while that follow-up is open (doc-sync reports it instead).
 
 **User check:** when a milestone's only open criteria are interactive, tell it you can't check right now.
 - [ ] Its status becomes `in progress (awaiting user check)`, and its dependents still start.
@@ -230,7 +231,7 @@ claude
 /implement all
 ```
 - [ ] After the design round and the `Approve …` commit, it starts `implement-loop.ps1` detached (a minimized PowerShell window on Windows), says how to stop it (`-Stop`), and relays loop lines (`RUN`, `DONE`, …) one line each. Closing the session doesn't stop the loop.
-- [ ] `loop.log`'s `START` and `RUN` lines show `model=sonnet` / `--model sonnet` (no `--model` given), and each `DONE` line ends with `· cost <model> $…` per model — Opus appears only for `Model: opus` workers and `full` reviews.
+- [ ] `loop.log`'s `START` and `RUN` lines show `model=sonnet` / `--model sonnet` (no `--model` given), and each `DONE` line ends with `· cost <model> $…` per model — Opus appears only for `Model: opus` workers and `full` reviews. Re-running with `/implement all --model opus` shows `model=opus` instead.
 - [ ] `.implement/loop/` holds `loop.log`, `state.json` and `run-<n>.jsonl`, and `git status` stays clean (the folder ignores itself).
 - [ ] Each milestone ran in its own session: one `run-<n>.jsonl` per milestone, each starting with a fresh context.
 - [ ] Run `pwsh -NoProfile -File <skills>/implement/scripts/implement-loop.ps1 -Stop` from another terminal: the loop logs `STOP requested`, finishes the current milestone, and ends with `STOPPED on request`.

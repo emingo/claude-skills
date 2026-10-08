@@ -29,10 +29,10 @@ A folder per milestone, so each reader opens only its slice.
 - **Decisions have one home:** the `D<n>` bullet in the overview — open (`Proposal / Alternative`) until decided, then `<chosen>. Rejected: <alt> — <why>. (<date>, user)` or `(…, autonomous, FU-NNN)`. An autonomous decision or one the user wants to revisit also gets a `kind: decision` ledger entry, linked from the bullet; nothing restates it in the as-built record.
 - **A refresh is its own commit** (`Refresh <M> milestone doc: <what changed>`) — the doc carries no refresh log.
 - **WP status lives in the overview's table** — the WP file carries none.
-- **Verification is not a work package.** Once every WP is landed, `/implement` runs the overview's Acceptance criteria and doc-sync lands the milestone. A doc written before this rule whose last WP is "verification" → treat that WP as this step and mark its row when the milestone lands.
+- **Verification is not a work package.** Once every WP is landed, `/implement` runs the overview's Acceptance criteria and doc-sync lands the milestone. A doc written before this rule whose last WP is "verification" → that WP is this step: never run it as a work package or launch a worker for it; `/implement` marks its row `☑ landed` when it sets `in progress (verification)`.
 - Templates: the `milestone` skill's `templates/folder/`.
 
-**Older single-file docs and ledgers are not supported.** A landed `M<n>-<slug>.md` is frozen history — read its As-built section when a later milestone depends on it, never edit it. An unlanded single-file milestone doc, or a ledger kept as one file → stop and tell the user to rewrite the doc with `/milestone <id>` or migrate the ledger with the `followup` skill's `scripts/fu-migrate.ps1`.
+**Older single-file docs and ledgers are not supported.** A landed `M<n>-<slug>.md` is frozen history — read its As-built section when a later milestone depends on it, never edit it. An unlanded single-file milestone doc, or a ledger kept as one file → stop and tell the user to rewrite the doc with `/milestone <id>` or migrate the ledger with the `followup` skill's `scripts/fu-migrate.ps1`. Exception: a project whose CLAUDE.md declares its own milestone genre (its `_template.md`, a design-doc + implementation-record split) keeps writing that genre with `/milestone`, but `/implement` and doc-sync's milestone transitions don't apply to it — say so and stop rather than suggesting a rewrite.
 
 ## Status words
 
@@ -43,6 +43,8 @@ A folder per milestone, so each reader opens only its slice.
 **Milestone doc `Status:`** `proposed` · `approved (YYYY-MM-DD)` · `in progress (WPx.n)` (the WP currently being worked; several when they run concurrently: `in progress (WP4a.2, WP4a.5)`) · `in progress (verification)` (every WP landed, acceptance criteria being run) · `in progress (awaiting user check)` (code complete, only interactive criteria left — counts as code-complete for dependents, does not land) · `☑ landed (YYYY-MM-DD, <sha>)` · `superseded (→ <doc>)`. A milestone lands only when every acceptance criterion passes; landing with one outstanding requires an explicit user decision, recorded as a qualifier (`☑ landed (2026-09-10, abc1234) — interactive check waived by user, see As-built`) and in the As-built record.
 
 **Ledger** (an entry's front-matter `status:`): `open` (optionally `open (re-deferred)`, `open (needs user)`, `open (partially resolved — M4)`) → `done (<sha> or PR #N, YYYY-MM-DD)` / `dropped (reason)`.
+
+**Linking entries:** by relative path to the entry file — `../../fu/FU-012.md` from a milestone folder — never to the generated index.
 
 **Finding entries:** grep the entry folder's front matter — `status:`, `kind:`, `areas:`, `files:` (repo paths and folders), `revisit:`; the `followup` skill lists the queries. Match a milestone or work package by the files it owns first, then by area. Open an entry only when it matches.
 

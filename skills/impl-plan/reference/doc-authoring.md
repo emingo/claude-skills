@@ -18,7 +18,7 @@ A project with its own genre is followed, not migrated: e.g. `r<N>` ids with a `
 ## Defaults (greenfield only)
 
 - Plan: `docs/implementation-plan.md`
-- Milestones: one folder per milestone, `docs/milestones/M<n>[a|b]-<kebab-slug>/` (layout below); index `docs/milestones/README.md`
+- Milestones: one folder per milestone, `docs/milestones/M<n>[a|b]-<kebab-slug>/` (layout in doc-model); index `docs/milestones/README.md`
 - `M0` = foundation: runnable, testable skeleton plus the first frozen contracts. Add it even if the user's outline starts at M1.
 - Split suffixes: `a`/`b` = either **parallel halves under one shared gate** or a **sequential split with separate gates** — the index must say which.
 - Work packages: `WP` + the milestone id minus its letter prefix + `.n` — M2 → `WP2.1`, M6a → `WP6a.3`, R4 → `WP4.2`. `.0` = apply reviewer decisions, confirm entry criteria, and pre-edit the shared hotspots; every other WP is implicitly After `.0`. There is no verification WP (doc-model, Milestone doc layout).

@@ -1,6 +1,6 @@
 ---
 name: walkthrough
-description: Work through a list point by point with the user — open questions, review findings, plan sections, options — each with a brief, a recommendation and a picker, tracked in a decision log. Also runs guided tours of a large document or repo (`/walkthrough tour …`). Not for a plain "explain X" question. Use when the user says "let's go through these one by one", "point by point", "walk me through the review/plan", "give me a tour of", "continue the walkthrough", or accepts an offer to do so.
+description: Work through a list point by point — open questions, review findings, plan sections, options — each with a brief, a recommendation and a picker, tracked in a decision log. Also runs guided tours of a large document or repo. Not for a plain "explain X" question. Use when the user says "go through these one by one", "point by point", "walk me through the review/plan", "guide me through this document/repo step by step", "give me a tour of", "continue the walkthrough", or accepts such an offer.
 argument-hint: "[<file> | <file>#<section> | tour [<file|dir|topic>] [goal] | resume [<log>]] [--only 2,5,7]"
 allowed-tools: Bash(git log *) Bash(git status *) Bash(git diff *) Bash(git show *) Bash(git rev-parse *)
 ---

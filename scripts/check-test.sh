@@ -153,16 +153,15 @@ test_1() {
   check "no links to the generated index from inside $MS" absent '\]\(([./]*)follow-ups\.md' "$MS"/*.md "$MS"/*/*.md
 }
 
-# wp_sync <milestone>: one commit per work package, no per-WP sync commits, and one "Sync docs for <M> (" commit after the last
+# wp_sync <milestone>: no per-WP sync commits, and one "Sync docs for <M> (" commit after the last work package commit
 wp_sync() {
-  local subjects wp last sync max out=
+  local subjects wp last sync max=0 out=
   subjects=$(git log --reverse --format=%s)
   [[ -n $(grep -F "($1 WP" <<<"$subjects") ]] || { echo "no '($1 WPx.y)' commits found"; return 1; }
   for wp in $(grep -oE "\($1 WP[0-9a-z.]+\)\$" <<<"$subjects" | grep -oE 'WP[0-9a-z.]+' | sort -u); do
     last=$(grep -nF "($1 $wp)" <<<"$subjects" | tail -1 | cut -d: -f1)
-    [[ $(grep -cF "($1 $wp)" <<<"$subjects") -eq 1 ]] || out+=" $wp(commits)"
     ! grep -qF "Sync docs for $1 $wp" <<<"$subjects" || out+=" $wp(per-WP sync)"
-    [[ $last -gt ${max:-0} ]] && max=$last
+    [[ $last -gt $max ]] && max=$last
   done
   sync=$(grep -nF "Sync docs for $1 (" <<<"$subjects" | tail -1 | cut -d: -f1)
   [[ -n $sync && $sync -gt $max ]] || out+=" no-landing-sync"
@@ -180,7 +179,7 @@ test_5() {
   check "M0 doc exists" test "${#m0[@]}" -gt 0
   [[ ${#m0[@]} -gt 0 ]] || return
   check "approval commit 'Approve the M0 milestone doc'" grep -qxF 'Approve the M0 milestone doc' <(git log --format=%s)
-  check "one commit per M0 work package, then a single Sync docs commit" wp_sync M0
+  check "no per-WP Sync docs commits, one after the last M0 work package" wp_sync M0
   check "M0 doc is ☑ landed with a date and sha" grep -qE '^\*\*Status:\*\* ☑ landed \([0-9]{4}-[0-9]{2}-[0-9]{2}, `?[0-9a-f]{7,}' "${m0[0]}"
   check "every row of M0's WP table is ☑ landed" wps_landed "${m0[0]}"
   check "as-built.md has a landing record" absent '^_Not landed yet\._' "${m0[0]%/*}/as-built.md"

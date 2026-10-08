@@ -2,6 +2,7 @@ You are reviewing a draft implementation plan with fresh eyes before any milesto
 
 Plan: <plan path>
 Doc model (the rules the plan must follow): <paths to doc-model.md and doc-authoring.md>
+Plan template (its comments say which sections are Optional): <path to templates/plan.md>
 Project context: <project CLAUDE.md path, spec/design docs, ledger path or "none">
 User decisions this session: <non-goals, stack choices, testing approach, default execution mode>
 

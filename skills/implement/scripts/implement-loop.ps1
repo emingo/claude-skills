@@ -37,10 +37,13 @@ function Test-LimitEnd([string] $path) {
 function Get-ModelCost([string] $path) {
     $last = Get-Content $path -ErrorAction SilentlyContinue | Where-Object { $_ -match '"type"\s*:\s*"result"' } | Select-Object -Last 1
     if (-not $last) { return '' }
-    try { $usage = Get-Field ($last | ConvertFrom-Json) 'modelUsage' } catch { return '' }
-    if (-not $usage) { return '' }
-    $parts = $usage.PSObject.Properties | ForEach-Object { '{0} ${1:0.00}' -f $_.Name, [double](Get-Field $_.Value 'costUSD') }
-    if ($parts) { ' · cost ' + ($parts -join ', ') } else { '' }
+    try {
+        $usage = Get-Field ($last | ConvertFrom-Json) 'modelUsage'
+        if (-not $usage) { return '' }
+        $inv = [cultureinfo]::InvariantCulture
+        $parts = $usage.PSObject.Properties | ForEach-Object { "$($_.Name) `$$(([double](Get-Field $_.Value 'costUSD')).ToString('0.00', $inv))" }
+        if ($parts) { ' · cost ' + ($parts -join ', ') } else { '' }
+    } catch { '' }
 }
 
 function Write-Log([string] $msg) {
