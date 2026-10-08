@@ -184,7 +184,7 @@ Let it finish. Then check:
 - [ ] The run report's Agents line names the WPs retried Haiku → Sonnet (or "none").
 - [ ] Follow-up files in `docs/fu/` are sequential and unique, the generated index lists each one, and the decision you left to the agents appears with `kind: decision`.
 - [ ] `git grep -n FU-TBD -- . ':!.claude' ':!docs'` returns nothing, and no `.implement/` folder exists.
-- [ ] `git worktree list` shows only the main checkout; `git branch --list 'worktree-agent-*'` shows nothing (or only branches the run report lists as **Blocked**).
+- [ ] `git worktree list` shows only the main checkout; `git branch --list 'worktree-agent-*'` shows nothing (or only branches the run report lists as **Blocked** or as empty harness branches git refused to delete).
 - [ ] The run report leads with what needs you: interactive checks with exact commands (e.g. for `--watch`), "needs your decision" items, blocked work, then decisions to review grouped by Kind.
 
 ## Test 8: the merge gate catches a note left for the coordinator
@@ -239,8 +239,8 @@ claude
 - [ ] Each milestone ran in its own session: one `run-<n>.jsonl` per milestone, each starting with a fresh context.
 - [ ] Run `pwsh -NoProfile -File <skills>/implement/scripts/implement-loop.ps1 -Stop` from another terminal: the loop logs `STOP requested`, finishes the current milestone, and ends with `STOPPED on request`.
 - [ ] Running `/implement` in an interactive session while the loop runs reports the running loop instead of starting a second coordinator (the loop's own `--unattended` sessions don't stop on it).
-- [ ] The coordinator session never ends a turn while a worker is running: between merges it sits in `wait-workers.ps1` calls, so a worker that takes longer than ten minutes doesn't end the session. If a session does die after committing work, the log says `INTERRUPTED … resuming` and the loop goes on instead of stopping after two.
-- [ ] With a one-milestone scope (`/implement M4`), the loop logs `ALL DONE — scope M4 is one milestone` right after `DONE` and starts no second session.
+- [ ] The coordinator session never ends a turn while a worker is running: between merges it sits in `wait-workers.ps1` calls (keyed by agent worktree folder, so a retried work package is watched under its new worktree), so a worker that takes longer than ten minutes doesn't end the session. If a session does die after committing work, the log says `INTERRUPTED … resuming` and the loop goes on instead of stopping after two.
+- [ ] With a one-milestone scope (`/implement M4`), the loop logs `ALL DONE — M4 was the whole scope` right after `DONE` and starts no second session; a split parent (`M4` with `M4a`/`M4b`) keeps going after the first half.
 - [ ] A milestone with only interactive criteria ends as `awaiting-check` and the loop moves on; a "needs user" decision stops the loop with `NEEDS YOU`.
 
 ## Test 13: just-in-time doc (same scratch folder)
@@ -255,7 +255,7 @@ Pick an unlanded milestone whose dependencies have landed, say M3. Remove its do
 - [ ] No refresh runs. With `--auto-approve` no question is asked: every open `D<n>` bullet becomes its Proposal, marked `(<date>, autonomous, FU-NNN)` where it shapes a contract, layout or behavior, and those follow-ups exist with `kind: decision`.
 - [ ] One commit `Add and approve the M3 milestone doc` holds the folder, the index row, the gate (`approved`) and the ledger entries.
 - [ ] It then starts WP3.0 in the **same** session — no "`/clear`, then `/implement`".
-- [ ] Repeat on another milestone **without** `--auto-approve`: the first batch of questions arrives while the doc is still being written, an answer that differs from its Proposal is sent to the writer as an amendment in one message, and nothing is asked after the last answer. The decisions are asked in batches of four (Proposal recommended, Alternative, "Decide autonomously"), answers are recorded as `(<date>, user)`, and implementation starts right after the commit.
+- [ ] Repeat on another milestone **without** `--auto-approve`: the first batch of questions arrives while the doc is still being written, an answer that differs from its Proposal is sent to the writer as an amendment in one message, and nothing is asked after the last answer. A desktop notification announces each question round that follows background work, and the loop's `NEEDS YOU` / `STOP` / `ALL DONE`. The decisions are asked in batches of four (Proposal recommended, Alternative, "Decide autonomously"), answers are recorded as `(<date>, user)`, and implementation starts right after the commit.
 - [ ] A milestone whose doc was written earlier with `/milestone` and committed: `/implement` refreshes it without re-reading the code (nothing but the doc's own commit landed since) and only asks its open decisions.
 
 ## Test 10: point-by-point walkthrough

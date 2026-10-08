@@ -39,7 +39,7 @@ _Projected — written before <ID> landed; `/milestone refresh <this id>` replac
 <!-- One bullet per design question, D1, D2… (owned [VERIFY] tags / register questions and genuine open choices; ids in the title). While open:
 - **D1. <Title>** (Q5, FU-012) — open. Proposal: <answer, one sentence, why>. Alternative: <other> — <why not>.
 Once decided, the same bullet becomes:
-- **D1. <Title>** — <chosen>. Rejected: <alternative> — <why>. (<YYYY-MM-DD>, user) — or (<YYYY-MM-DD>, autonomous, [FU-NNN](../../fu/FU-NNN.md))
+- **D1. <Title>** — <chosen>. Rejected: <alternative> — <why>. (<YYYY-MM-DD>, user) — or (<YYYY-MM-DD>, autonomous, [FU-NNN](../../fu/FU-NNN.md)) for a Proposal taken on the user's behalf — or (<YYYY-MM-DD>, autonomous) for a minor choice the writer settled itself
 A question that needs more reasoning gets a `### D1. <Title>` block under the list, at most ten lines. If there are none: None — <reason>. -->
 
 ## Work packages

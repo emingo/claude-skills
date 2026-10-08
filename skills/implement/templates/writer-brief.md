@@ -29,7 +29,7 @@ Split suggestion: <only when it needs more than about 8 work packages: where to 
 
 Do what that skill's main agent does for `/milestone <id>` — skeleton row, draft, consistency pass, index row, the plan's gate link and `proposed` — with these differences:
 
-- **Never ask.** The decisions you raised stay open bullets with your Proposal and Alternative; write the work packages as if each Proposal holds.
+- **Never ask.** The decisions you raised in the scan stay open bullets with your Proposal and Alternative; write the work packages as if each Proposal holds. A choice you only meet now, you settle yourself as a decided `(<date>, autonomous)` bullet — the user has already been asked. (`Mode: unattended`: there was no scan, so the choices that would have been decisions for the user are the open bullets.)
 - **Draft inline.** Launch no subagents.
 - **Write each file once.** WP files first, the overview last, when you know what it has to hold: one line per decision, contracts as signatures. Aim for 12 KB; up to 16 KB is fine; at most one trimming pass. A WP file over 6 KB means the WP is too big — split the WP.
 - **Stop instead of deciding** when a work package needs a package outside the plan's Stack, or the plan's Status is `draft`: write nothing and report `STOP <reason>`.
@@ -46,6 +46,7 @@ Open decisions:
 Opus WPs: <WP id — the unsettled choice> (or: none)
 Consistency issues left: <list, or none>
 Ledger entries to re-defer: <FU id — why> (or: none)
+Split suggestion: <unattended mode only — where to cut a milestone of more than about 8 work packages> (or: none)
 ```
 
 **Amendments.** If you are resumed with answers that differ from your Proposals, change only the files those answers affect, leave the decision bullets open (the main session records the answers), and send the same report again.

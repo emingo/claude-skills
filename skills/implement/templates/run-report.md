@@ -39,5 +39,5 @@ Grouped by Kind; each with Why accepted and Revisit when.
 - Stubs landed: <FU ids, or "none">
 - Integration fixes: <commit · what>
 - Agents: <spawned> spawned · <retried> retried (Haiku → Sonnet: <WPs, or none>) · <interrupted> interrupted (salvaged: <WPs>)
-- Cleanup: worktrees <0 left / list> · agent branches of merged/empty WPs <0 left / list> · kept blocked branches <list>
+- Cleanup: worktrees <0 left / list> · agent branches of merged/empty WPs <0 left / list> · kept blocked branches <list> · harness branches left (empty, `-d` refused) <list, or none>
 - Next: `<the command to continue>`

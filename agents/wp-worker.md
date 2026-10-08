@@ -29,7 +29,7 @@ You implement exactly one work package (WP) of a planned project. A coordinator 
 - **Commit after every green step** (`WIP <M> <WPx.y>: <what>`), updating the report as you go. Never amend, rebase or squash — your history is how interrupted work gets recovered.
 - **Use the brief's build and test commands as given** — they cap parallelism because other workers share the machine; don't drop the jobs flag or re-add a build/restore the commands skip.
 - **Keep command output small:** send build and test output to a log file and print only the summary lines (warning/error counts, test totals); read the log only when something failed. Never dump full logs, process listings or large files into the conversation.
-- **Never repair the worktree's base or history yourself** beyond the brief's first step (no `reset`, `read-tree`, `rebase`, `checkout -B`). If the base still looks wrong, say so under Coordinator notes and carry on.
+- **Never repair the worktree's base or history yourself** beyond the brief's first step (no `reset`, `read-tree`, `rebase`, `checkout -B`). If the base is still wrong after that step, you are blocked: say so in the report and stop.
 - **Never sleep or poll-wait** for long-running commands; run them in the foreground with a timeout, or in the background and get notified.
 - A choice the docs don't settle: pick the option most consistent with the WP's Proposal and the frozen contracts, and record it in the report as Chosen / Rejected / **Cost**.
 - Something you can't finish or deliberately leave out: record it as a follow-up candidate (Kind, Why accepted, Revisit when, files) — don't silently skip it.

@@ -6,19 +6,20 @@ A startable milestone in scope has no doc (preflight step 5): a **writer agent**
 
 ## 1. Scan
 
-Launch the writer as early as preflight allows — right after the resume check, alongside the baseline build, before any question to the user: Agent tool, `subagent_type: general-purpose`, `model: "sonnet"` (never a smaller model; `"opus"` when the user asks for it), in the background, with `${CLAUDE_SKILL_DIR}/templates/writer-brief.md` filled in. One writer per milestone; several startable milestones without docs → one at a time, in plan order, so each writer sees the file ownership the previous one claimed.
+Launch the writer as early as preflight allows — right after the resume check, alongside the baseline build, before any question to the user: Agent tool, `subagent_type: general-purpose`, `model: "sonnet"` (never a smaller model; `"opus"` when the user asks for it), in the background (`--unattended`: in the **foreground** — a session that waits idle on a background writer dies after ten minutes), with `${CLAUDE_SKILL_DIR}/templates/writer-brief.md` filled in. One writer per milestone; several startable milestones without docs → one at a time, in plan order, so each writer sees the file ownership the previous one claimed.
 
 Its first hand-back, after about two minutes, is the **scan report**: the work packages it intends and the decisions only the user can make. It follows the `milestone` skill's single-doc path as that skill's main agent would. Never write or patch a milestone doc in this session.
 
-- `STOP <reason>` (a package outside Stack, or the plan is still `draft`) → interactive: tell the user and offer `/milestone <id>`, which can ask them; `--unattended`: stop with `needs-user`.
-- `--unattended`: the brief's unattended mode — no scan hand-back, the writer goes straight through and step 2 is skipped.
+- `STOP <reason>` (a package outside Stack, or the plan is still `draft`), in the scan or later in the doc report → interactive: tell the user and offer `/milestone <id>`, which can ask them; `--unattended`: stop with `needs-user`. Anything the writer already wrote stays uncommitted for that.
+- `--unattended`: the brief's unattended mode — no scan hand-back, the writer goes straight through and step 2 is skipped. A `Split suggestion` in its doc report → stop with `needs-user` before approving.
 
 ## 2. Ask while it writes
 
-On the scan report, in this order and without waiting:
+The scan writes nothing, so it can run during preflight; the writer is **resumed to write only once the baseline is green and the plan is approved** (preflight steps 3–4) — a run that stops there leaves no half-written doc. Then, in this order and without waiting:
 
+0. **A split suggestion in the scan is asked first, alone, before the writer is resumed** — also under `--auto-approve`: go on as one milestone, or stop here and split it with `/milestone <id>`.
 1. **Resume the writer** with SendMessage to its agent id (load the tool with ToolSearch if it isn't listed): "Write the doc, assuming your Proposals." It keeps its context and writes in the background.
-2. **Ask the user** the scan's decisions with AskUserQuestion, in batches of four: the Proposal (Recommended), the Alternative, and "Decide autonomously". With `--auto-approve`, ask nothing. A split suggestion in the scan is the first question: go on as one milestone, or stop and split it with `/milestone <id>`.
+2. **Ask the user** the scan's decisions with AskUserQuestion, in batches of four: the Proposal (Recommended), the Alternative, and "Decide autonomously". With `--auto-approve`, ask none of them. Before a round that follows a wait on background work, send one PushNotification naming the milestone and what is waiting (`M41: 4 decisions waiting — saves, page size, layers, line art`); load the tool with ToolSearch if it isn't listed, and carry on without it if it is unavailable. Not for a round that follows the user's own answer.
 3. Note every answer that differs from its Proposal — those are the **amendments**.
 
 ## 3. Finish the doc
