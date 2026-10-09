@@ -5,7 +5,11 @@
 # -Model is the coordinator's model; workers and reviewers get theirs per work package.
 #   pwsh -NoProfile -File implement-loop.ps1 -Stop      # stop cleanly after the current milestone
 # Run from the repo root. Files live in .implement/loop/ (self-ignored, so the tree stays clean):
-#   loop.log (one line per event) · state.json (written by each session) · run-<n>.jsonl (each session's stream)
+#   loop.log (one line per event, all runs) · state.json (written by each session) · history.jsonl (one line per session:
+#   milestone, result, minutes, cost per model, agents launched, session id) · runs/<start time>-<scope>/ (this run's
+#   run-<n>.jsonl streams and state-<n>.json files — never overwritten by a later run)
+# Each session's full transcript, with its subagents, is in the Claude config dir under projects/<project>/<session id>*;
+# the SESSION line in loop.log names it.
 param(
     [string] $Scope = 'all',
     [int] $MaxIterations = 20,
@@ -48,8 +52,52 @@ function Get-ModelCost([string] $path) {
 
 function Write-Log([string] $msg) {
     $line = "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') $msg"
-    Add-Content -Path $log -Value $line -Encoding utf8
+    # A watcher reading loop.log can hold it for a moment; losing a line (or dying on it) is worse than waiting.
+    for ($try = 1; $try -le 20; $try++) {
+        try { Add-Content -Path $log -Value $line -Encoding utf8 -ErrorAction Stop; break } catch { Start-Sleep -Milliseconds 250 }
+    }
     Write-Host $line
+}
+
+# What a finished session leaves behind for later comparison: its id, turn count, cost per model and the agents it launched.
+function Get-RunFacts([string] $path) {
+    $facts = [ordered]@{ session = $null; turns = $null; cost = [ordered]@{}; agents = [ordered]@{} }
+    foreach ($l in (Get-Content $path -ErrorAction SilentlyContinue)) {
+        if (-not $facts.session -and $l -match '"session_id"\s*:\s*"([0-9a-f-]{36})"') { $facts.session = $Matches[1] }
+        if ($l -notmatch '"name"\s*:\s*"(Agent|Task)"' -and $l -notmatch '"type"\s*:\s*"result"') { continue }
+        try { $o = $l | ConvertFrom-Json } catch { continue }
+        if ((Get-Field $o 'type') -eq 'result') {
+            $facts.turns = Get-Field $o 'num_turns'
+            $usage = Get-Field $o 'modelUsage'
+            if ($usage) { foreach ($p in $usage.PSObject.Properties) { $facts.cost[$p.Name] = [math]::Round([double](Get-Field $p.Value 'costUSD'), 2) } }
+            continue
+        }
+        $msg = Get-Field $o 'message'; if (-not $msg) { continue }
+        $who = if (Get-Field $o 'parent_tool_use_id') { 'nested ' } else { '' }
+        foreach ($b in @(Get-Field $msg 'content')) {
+            if ($b -is [string] -or (Get-Field $b 'type') -ne 'tool_use' -or (Get-Field $b 'name') -notin 'Agent', 'Task') { continue }
+            $in = Get-Field $b 'input'
+            $key = "$who$(Get-Field $in 'subagent_type')$(if (Get-Field $in 'model') { " [$(Get-Field $in 'model')]" })"
+            $facts.agents[$key] = 1 + [int]$facts.agents[$key]
+        }
+    }
+    $facts
+}
+
+# One history line per session, and the SESSION line that says where its full transcript is.
+function Write-History([int] $n, [string] $path, [datetime] $began, $stateObj, [string] $outcome) {
+    try {
+        $f = Get-RunFacts $path
+        $root = if ($env:CLAUDE_CONFIG_DIR) { $env:CLAUDE_CONFIG_DIR } else { Join-Path $HOME '.claude' }
+        $transcript = if ($f.session) { Get-ChildItem (Join-Path $root 'projects') -Filter "$($f.session).jsonl" -Recurse -Depth 1 -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName } else { $null }
+        Write-Log "SESSION $n — $(if ($f.session) { $f.session } else { 'id not found' })$(if ($transcript) { " · transcript $transcript (subagents in the folder of the same name)" })"
+        [ordered]@{
+            started = $began.ToString('s'); minutes = [math]::Round(((Get-Date) - $began).TotalMinutes, 1); scope = $Scope; model = $Model
+            milestone = if ($stateObj) { Get-Field $stateObj 'milestone' } else { $null }; result = $outcome
+            sha = if ($stateObj) { Get-Field $stateObj 'sha' } else { $null }
+            session = $f.session; transcript = $transcript; stream = $path; turns = $f.turns; cost = $f.cost; agents = $f.agents
+        } | ConvertTo-Json -Compress -Depth 4 | Add-Content -Path "$dir/history.jsonl" -Encoding utf8
+    } catch { Write-Log "history: could not record session $n ($($_.Exception.Message))" }
 }
 
 if ($Stop) { New-Item -ItemType File -Force -Path $stopFile | Out-Null; Write-Log 'STOP requested — the loop ends after the current milestone'; exit 0 }
@@ -61,6 +109,12 @@ if (Test-Path $lock) {
 Set-Content -Path $lock -Value $PID
 Remove-Item $stopFile -ErrorAction SilentlyContinue
 
+# Every loop start gets its own folder, so one run's streams are never overwritten by the next.
+$runDir = "$dir/runs/$(Get-Date -Format 'yyyyMMdd-HHmm')-$($Scope -replace '[^\w.-]', '_')"
+New-Item -ItemType Directory -Force -Path $runDir | Out-Null
+$old = @(Get-ChildItem $dir -File -Filter 'run-*.jsonl') + @(Get-ChildItem $dir -Directory -Filter 'archive-*')
+if ($old) { New-Item -ItemType Directory -Force -Path "$dir/runs/legacy" | Out-Null; $old | Move-Item -Destination "$dir/runs/legacy" -Force }
+
 $failures = 0; $interrupts = 0; $limitWaits = 0; $code = 0
 try {
     Write-Log "START scope=$Scope max=$MaxIterations model=$Model"
@@ -68,7 +122,7 @@ try {
     :iter for ($i = 1; $i -le $MaxIterations; $i++) {
         if (Test-Path $stopFile) { Write-Log 'STOPPED on request'; break }
         Remove-Item $state -ErrorAction SilentlyContinue
-        $run = "$dir/run-$i.jsonl"
+        $run = "$runDir/run-$i.jsonl"; $began = Get-Date
         $claudeArgs = @('-p', "/implement $Scope --unattended", '--output-format', 'stream-json', '--verbose',
                   '--permission-prompts', 'none', '--strict-mcp-config', '--name', "implement loop $i")
         if ($Model) { $claudeArgs += @('--model', $Model) }
@@ -79,6 +133,7 @@ try {
         $exit = $LASTEXITCODE
 
         if (-not (Test-Path $state)) {
+            Write-History $i $run $began $null "no state file (exit $exit)"
             # No state file: the session died before finishing. A usage limit waits; anything else counts as a failure.
             if (Test-LimitEnd $run) {
                 if (++$limitWaits -gt $MaxLimitWaits) { Write-Log "STOP — usage limit persisted through $MaxLimitWaits waits"; $code = 1; break }
@@ -92,6 +147,8 @@ try {
         }
 
         $s = Get-Content $state -Raw | ConvertFrom-Json
+        Copy-Item $state "$runDir/state-$i.json" -Force
+        Write-History $i $run $began $s "$(Get-Field $s 'result')"
         $failures = 0; $interrupts = 0
         $result = Get-Field $s 'result'; $sha = Get-Field $s 'sha'; $needs = Get-Field $s 'needsUser'; $resetAt = Get-Field $s 'resetAt'
         $line = "$(Get-Field $s 'milestone') $result$(if ($sha) { " $sha" }) — $(Get-Field $s 'summary')"

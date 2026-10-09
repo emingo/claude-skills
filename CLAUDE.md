@@ -34,6 +34,8 @@ The newer/older check compares file timestamps, so it can't tell when *both* sid
 
 `scripts/lint.sh` enforces: skill and agent names match their paths, descriptions of at most 500 characters, every agent has a `color`, the reviewer and writing-agent rules below, every `${CLAUDE_SKILL_DIR}/…` path exists, the reviewer roster, and a coverage row in `tests.md` per skill. It also fails on any tracked file matching a pattern in `.lint-deny` (gitignored, one regex per line) — that is what keeps private project names out; without the file that check is skipped.
 
+`scripts/archive-transcripts.ps1` is machine setup too: it mirrors `~/.claude/projects` (every session transcript, with its subagents) into an archive folder without ever deleting, so transcripts outlive Claude Code's retention sweep (`cleanupPeriodDays`, 90 days here). `-Register` installs it as a daily scheduled task; sync.sh never deploys it.
+
 `scripts/defender-dev-exclusions.ps1` is machine setup, not config: run it yourself in an elevated pwsh (`-WhatIf` first, `-Remove` undoes) to exclude dev folders from Defender's real-time scan. sync.sh never deploys it.
 
 To trial a draft agent or skill without deploying it globally, copy it into a test project's `.claude/agents/` or `.claude/skills/`; project-local definitions shadow global ones.

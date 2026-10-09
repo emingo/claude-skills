@@ -2,6 +2,15 @@
 
 Every change to the global CLAUDE.md, an agent, or a skill gets an entry here, newest first. Record the *why* — the git diff already shows the what.
 
+## 2026-10-09
+
+- **implement, repo** — Swarm runs stay findable, so one run can be compared with the next while the workflow is being tuned.
+  - **Each loop start has its own folder,** `.implement/loop/runs/<start time>-<scope>/`. Before, every start wrote `run-1.jsonl` again: project A's M45 stream replaced M41's, and the folder held a mix of three runs.
+  - **`loop.log` names each session's transcript** (`SESSION <n> — <id> · transcript <path>`). The complete record — coordinator, every worker, reviewer and doc-sync — was always under the Claude config dir, but nothing said which session belonged to which run.
+  - **`history.jsonl` gets one line per session:** milestone, result, minutes, cost per model, turns, agents launched by type and model. Comparing runs took a transcript analysis each time.
+  - **Logging survives a locked log file.** M45's loop ended without its `ALL DONE` and `END` lines although the lock was released — consistent with `Add-Content` failing while the watcher read the file. `Write-Log` now retries for five seconds.
+  - **`scripts/archive-transcripts.ps1`** (machine setup, like the Defender script) mirrors `~/.claude/projects` to an archive folder and never deletes. Claude Code removes transcripts older than `cleanupPeriodDays` (default 30 days, which is how a month of sessions vanished); the setting is now 90 days on this machine and the archive keeps everything after that.
+
 ## 2026-10-08
 
 - **implement, wp-worker, milestone, doc-model** — Fixes from the first two Haiku-trial runs (project A's M37 and M41) and a faster path to the first question. M37 landed in 35 minutes for $9.15; M41's loop died twice and had to be finished by hand.
