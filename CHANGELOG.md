@@ -4,6 +4,10 @@ Every change to the global CLAUDE.md, an agent, or a skill gets an entry here, n
 
 ## 2026-10-09
 
+- **wp-worker, implement** — Two fixes from project A's M45 run, the first swarm to finish in one session (48 minutes, $8.49).
+  - **Workers no longer merge the main branch into theirs before finishing.** Claude Code's auto-mode permission check refused that `git merge` from a worker's worktree, so two of six work packages came back `partial` with finished, reviewed code and each needed a retry. The coordinator's merge already builds and tests the combined result, so the step bought nothing the merge protocol doesn't cover.
+  - **An old run's files no longer shape a new one.** The M45 coordinator read a brief the M41 coordinator had saved under `.implement/logs/` and copied its first step — the re-branching workaround for a worktree-base problem that was already fixed. Briefs now come only from the skill's template, are not saved to files, and `.implement/logs/` is emptied when a run starts.
+
 - **implement, repo** — Swarm runs stay findable, so one run can be compared with the next while the workflow is being tuned.
   - **Each loop start has its own folder,** `.implement/loop/runs/<start time>-<scope>/`. Before, every start wrote `run-1.jsonl` again: project A's M45 stream replaced M41's, and the folder held a mix of three runs.
   - **`loop.log` names each session's transcript** (`SESSION <n> — <id> · transcript <path>`). The complete record — coordinator, every worker, reviewer and doc-sync — was always under the Claude config dir, but nothing said which session belonged to which run.
